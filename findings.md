@@ -152,6 +152,7 @@
 
 - Node 静态校验已通过：1 段内联脚本可解析，侧栏菜单为 4 项且无 `overview` 入口，受控用户保持默认页及激活态，“风控管理”旧文案为 0。
 - in-app Browser 对当前 `file://` 页面的 DOM 读取仍被 URL 策略拒绝，未绕过限制；导航视觉与顶部文案仍待本地刷新复验。
+- 本批次功能与首轮留痕提交为 `6d92606`（`fix: simplify refund risk navigation`），已推送至 `origin/master`。
 
 ## 问题记录
 
