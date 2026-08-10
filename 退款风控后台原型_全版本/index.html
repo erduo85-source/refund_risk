@@ -2735,6 +2735,10 @@ svg {
   gap: 13px;
 }
 
+.policy-status-content {
+  min-width: 0;
+}
+
 .policy-status-icon {
   width: 44px;
   height: 44px;
@@ -7552,6 +7556,7 @@ renderPolicySummaryCard = function renderPolicySummaryCardV3(key, card) {
 
 renderConfig = function renderConfigV3() {
   const mode = policyModeMeta(policyV2State.mode);
+  const statusLabel = policyV2State.mode === "protect" ? "已开启风控" : mode.label;
   document.getElementById("page-config").innerHTML = `
     ${pageHeading(
       "configTitle",
@@ -7562,10 +7567,12 @@ renderConfig = function renderConfigV3() {
       <div class="policy-status-top">
         <div class="policy-status-copy">
           <span class="policy-status-icon">${icon("shield")}</span>
-          <div><h2 id="policyStatusTitle">退款风控总状态</h2><p>${mode.description}</p></div>
+          <div class="policy-status-content">
+            <span class="policy-live-badge ${mode.badgeClass}" id="policyStatusTitle">${statusLabel}</span>
+            <p>${mode.description}</p>
+          </div>
         </div>
         <div class="policy-status-actions">
-          <span class="policy-live-badge ${mode.badgeClass}">${mode.label}</span>
           <button class="button secondary" type="button" data-policy-status-edit>${icon("settings")}修改状态</button>
         </div>
       </div>
