@@ -2103,6 +2103,18 @@ svg {
   font-size: 12px;
 }
 
+.timeline-operator {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #eaf3ff;
+  color: #245b99;
+  font-size: 12px;
+  line-height: 20px;
+}
+
 .timeline time {
   display: block;
   margin-top: 2px;
@@ -5173,6 +5185,7 @@ const baseUsers = [
     count: 1,
     supplement: 188,
     status: "recovered",
+    unlockMode: "auto",
     score: 34,
     trigger: "单笔退款金额超限",
     updated: "2026-07-29 12:16",
@@ -5233,6 +5246,8 @@ const baseUsers = [
     count: 4,
     supplement: 648,
     status: "recovered",
+    unlockMode: "manual",
+    unlockOperator: "周岚",
     score: 41,
     trigger: "累计退款金额超限",
     updated: "2026-07-29 09:54",
@@ -5303,7 +5318,7 @@ const auditLogs = [
   { time: "2026-07-29 12:16:04", operator: "系统", type: "账号解封", target: "Ares_Lee / U-79241650", detail: "补款已达到解封阈值", result: "成功", resultClass: "success" },
   { time: "2026-07-29 11:06:19", operator: "周岚", type: "账号封禁", target: "MoonRabbit / U-29410586", detail: "高频退款并消耗虚拟资产", result: "成功", resultClass: "success" },
   { time: "2026-07-29 10:01:42", operator: "系统", type: "策略修改", target: "补款解封规则", detail: "解封方式调整为补款完成后自动解封", result: "成功", resultClass: "success" },
-  { time: "2026-07-29 09:54:11", operator: "系统", type: "账号解封", target: "Kay_Dragon / U-43018726", detail: "补款 ¥648.00 已到账", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 09:54:11", operator: "周岚", type: "账号解封", target: "Kay_Dragon / U-43018726", detail: "人工核验补款 ¥648.00 后解封", result: "成功", resultClass: "success" },
 ];
 
 const state = {
@@ -6709,10 +6724,17 @@ function buildDrawerRefundOrders(user) {
 }
 
 function renderDrawerRiskTimeline(user) {
+  const isManualUnlock = user.status === "recovered" && user.unlockMode === "manual";
   const currentEvent = user.status === "blocked"
     ? { title: "系统自动封禁", detail: user.trigger, color: "#ff4d4f", fill: "#ff4d4f" }
     : user.status === "recovered"
-      ? { title: "系统自动解封", detail: "补款条件已满足，账号恢复登录", color: "#52c41a", fill: "#52c41a" }
+      ? {
+        title: isManualUnlock ? "人工手动解封" : "系统自动解封",
+        detail: isManualUnlock ? "运营人工核验后解除登录拦截" : "补款条件已满足，账号恢复登录",
+        operator: isManualUnlock ? (user.unlockOperator || "未知") : "",
+        color: "#52c41a",
+        fill: "#52c41a",
+      }
       : { title: "账号进入观察", detail: user.trigger, color: "#1677ff", fill: "#1677ff" };
   const events = [{ ...currentEvent, time: user.updated }];
   if (user.supplement > 0) {
@@ -6744,7 +6766,7 @@ function renderDrawerRiskTimeline(user) {
       fill: "#fff",
     },
   );
-  return events.map((event) => `<li style="--timeline-color:${event.color};--timeline-fill:${event.fill}"><strong>${event.title}</strong><time>${event.time}</time><p>${event.detail}</p>${event.amount ? `<span class="timeline-amount ${event.amountClass}">${event.amount}</span>` : ""}</li>`).join("");
+  return events.map((event) => `<li style="--timeline-color:${event.color};--timeline-fill:${event.fill}"><strong>${event.title}</strong><time>${event.time}</time><p>${event.detail}</p>${event.operator ? `<span class="timeline-operator">操作人：${event.operator}</span>` : ""}${event.amount ? `<span class="timeline-amount ${event.amountClass}">${event.amount}</span>` : ""}</li>`).join("");
 }
 
 function renderDrawerOrderRows(user) {
@@ -6968,8 +6990,16 @@ function confirmAction() {
   state.users.forEach((user) => {
     if (state.modalTargets.includes(user.id)) {
       user.status = isBlock ? "blocked" : "recovered";
-      if (!isBlock) user.supplement = supplementAmount;
+      if (isBlock) {
+        user.unlockMode = null;
+        user.unlockOperator = null;
+      } else {
+        user.supplement = supplementAmount;
+        user.unlockMode = "manual";
+        user.unlockOperator = "张晓齐";
+      }
       user.updated = "2026-07-29 刚刚";
+      recentOperatorRecords[user.id] = ["张晓齐", "2026-07-29 刚刚"];
     }
   });
   state.filteredUsers = state.filteredUsers.map(
@@ -7723,7 +7753,7 @@ const recentOperatorRecords = {
   "U-79241650": ["系统", "2026-08-06 12:16"],
   "U-29410586": ["周岚", "2026-08-06 11:05"],
   "U-81650329": ["系统", "2026-08-06 10:29"],
-  "U-43018726": ["系统", "2026-08-06 09:54"],
+  "U-43018726": ["周岚", "2026-08-06 09:54"],
   "U-30561974": ["林晓", "2026-08-06 09:12"],
   "U-67182495": ["系统", "2026-08-06 08:37"],
 };
