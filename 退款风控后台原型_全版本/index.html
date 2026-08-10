@@ -5614,7 +5614,7 @@ function renderUsers() {
       "管理退款用户，支持提前封禁和手动解封",
     )}
     <div class="scope-strip" aria-label="退款风控链路状态">
-      <span class="scope-mode">已开启用户风控</span>
+      <span class="scope-mode">已开启退款风控</span>
       <span class="scope-divider" aria-hidden="true"></span>
       <div class="scope-channels">
         <span class="scope-channel"><span class="mini-platform apple">A</span>App Store</span>
@@ -7684,7 +7684,7 @@ function syncUserRiskStatusBadge() {
   const badge = document.querySelector("#page-users .scope-mode");
   if (!badge) return;
   const meta = policyModeMeta(policyV2State.mode);
-  badge.textContent = meta.label;
+  badge.textContent = policyV2State.mode === "protect" ? "已开启退款风控" : meta.label;
   badge.classList.toggle("monitor-mode", policyV2State.mode === "monitor");
   badge.classList.toggle("off-mode", policyV2State.mode === "off");
 }
