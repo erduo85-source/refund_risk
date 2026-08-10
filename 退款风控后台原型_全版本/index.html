@@ -4982,7 +4982,7 @@ const projects = {
 const baseUsers = [
   {
     id: "U-87924130",
-    sdkId: "100013721737237",
+    sdkId: "1000128138132",
     name: "Starlord_77",
     avatar: "ST",
     store: "apple",
@@ -4994,7 +4994,7 @@ const baseUsers = [
     trigger: "累计退款金额超限",
     updated: "2026-07-29 14:32",
     country: "中国大陆",
-    account: "67****32@qq.com",
+    account: "67***832@qq.com",
     order: "MTXH7K2D9J",
     firstRefund: "2026-07-27 18:26",
     lastLogin: "2026-07-29 14:31",
@@ -5141,6 +5141,17 @@ const baseUsers = [
     device: "OnePlus 15 · Android 17",
   },
 ];
+
+const userProfileDetails = {
+  "U-87924130": { uids: ["u129312301320130", "u129312301320138"], refundStores: ["apple", "google"], lastLoginIp: "192.186.11.1 中国上海" },
+  "U-50192847": { uids: ["u129312301320248"], refundStores: ["google"], lastLoginIp: "103.27.184.22 新加坡" },
+  "U-79241650": { uids: ["u129312301320259"], refundStores: ["apple"], lastLoginIp: "203.186.95.18 中国香港" },
+  "U-29410586": { uids: ["u129312301320260", "u129312301320261"], refundStores: ["google", "apple"], lastLoginIp: "126.35.72.41 日本东京" },
+  "U-81650329": { uids: ["u129312301320271"], refundStores: ["apple"], lastLoginIp: "192.168.18.36 中国北京" },
+  "U-43018726": { uids: ["u129312301320282"], refundStores: ["google"], lastLoginIp: "175.136.62.19 马来西亚吉隆坡" },
+  "U-30561974": { uids: ["u129312301320293"], refundStores: ["apple"], lastLoginIp: "118.163.47.12 中国台北" },
+  "U-67182495": { uids: ["u129312301320304"], refundStores: ["google"], lastLoginIp: "49.228.116.33 泰国曼谷" },
+};
 
 const auditLogs = [
   { time: "2026-07-29 14:32:08", operator: "系统", type: "账号封禁", target: "Starlord_77 / U-87924130", detail: "命中累计退款金额规则", result: "成功", resultClass: "success" },
@@ -6603,9 +6614,23 @@ function renderDrawerOrderRows(user) {
   </tr>`).join("");
 }
 
+function getUserProfileDetails(user) {
+  return userProfileDetails[user.id] || {
+    uids: [`u${String(user.sdkId).replace(/\D/g, "")}`],
+    refundStores: [user.store],
+    lastLoginIp: "192.168.1.1 中国上海",
+  };
+}
+
+function getProfileStoreNames(stores) {
+  return stores.map((store) => store === "apple" ? "App Store" : "Google Play").join("、");
+}
+
 function openDrawer(userId) {
   const user = state.users.find((item) => item.id === userId);
   if (!user) return;
+  const profile = getUserProfileDetails(user);
+  const profileUidText = profile.uids.join("、");
   state.activeDrawerUser = userId;
   const need = Math.max(user.refund - user.supplement, 0);
   document.getElementById("drawerContent").innerHTML = `
@@ -6618,7 +6643,7 @@ function openDrawer(userId) {
         <div class="drawer-user drawer-user-banner">
           <div class="drawer-user-identifiers">
             <div class="copy-line"><span class="copy-value drawer-user-account">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div>
-            <div class="copy-line"><span class="copy-value drawer-user-uid">UID：${user.id}</span>${refundCopyButton(user.id, "UID")}</div>
+            <div class="copy-line"><span class="copy-value drawer-user-uid">UID：${profileUidText}</span>${refundCopyButton(profileUidText, "UID")}</div>
           </div>
           ${statusTag(user.status)}
         </div>
@@ -6635,14 +6660,13 @@ function openDrawer(userId) {
       </div>
       <div class="drawer-panel active" id="drawer-profile" role="tabpanel" aria-labelledby="drawer-tab-profile">
         <dl class="detail-list">
-          <div><dt>账号名</dt><dd><div class="copy-line"><span class="copy-value">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div></dd></div>
-          <div><dt>UID</dt><dd><div class="copy-line"><span class="copy-value">${user.id}</span>${refundCopyButton(user.id, "UID")}</div></dd></div>
           <div><dt>SDKID</dt><dd><div class="copy-line"><span class="copy-value">${user.sdkId}</span>${refundCopyButton(user.sdkId, "SDKID")}</div></dd></div>
-          <div><dt>退款渠道</dt><dd>${storeBadge(user.store)}</dd></div>
-          <div><dt>触发规则</dt><dd>${user.trigger}</dd></div>
-          <div><dt>首次退款</dt><dd>${user.firstRefund}</dd></div>
-          <div><dt>最近登录</dt><dd>${user.lastLogin}</dd></div>
-          <div><dt>最近设备</dt><dd>${user.device}</dd></div>
+          <div><dt>账号名</dt><dd><div class="copy-line"><span class="copy-value">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div></dd></div>
+          <div><dt>UID</dt><dd class="profile-multi-value">${profileUidText}</dd></div>
+          <div><dt>退款渠道</dt><dd class="profile-multi-value">${getProfileStoreNames(profile.refundStores)}</dd></div>
+          <div><dt>最近登录时间</dt><dd>${user.lastLogin}</dd></div>
+          <div><dt>最近登录设备</dt><dd>${user.device}</dd></div>
+          <div><dt>最近登录IP</dt><dd>${profile.lastLoginIp}</dd></div>
         </dl>
       </div>
       <div class="drawer-panel" id="drawer-timeline" role="tabpanel" aria-labelledby="drawer-tab-timeline">
