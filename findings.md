@@ -96,6 +96,7 @@
 - 内联脚本已由 Node.js 解析通过；12 项新旧标记、7 列表头、8 个 SDKID、复制与订单详情入口静态断言全部通过。
 - `git diff --check` 无空白错误。
 - in-app Browser 对当前 `file://` 页面仍无法自动刷新，因此真实视觉、点击复制、日期弹层和详情抽屉交互尚未在刷新后的页面中验证。
+- 本批次功能与首轮留痕提交为 `9b68277`（`fix: refine refund records page`），已推送至 `origin/master`。
 
 ## 问题记录
 
