@@ -3797,22 +3797,6 @@ svg {
 .trigger-section-head {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-}
-
-.trigger-section-index {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
-  border-radius: 8px;
-  background: #eaf3ff;
-  color: var(--primary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 650;
-  line-height: 1;
 }
 
 .trigger-section-heading {
@@ -8091,10 +8075,9 @@ function updateTriggerPolicySummary(settings) {
   policyV3NaturalDescriptions.trigger = `已启用 <strong>${enabledCount} 项</strong>封禁规则；${relationText}条件时触发封禁，累计指标统计账号近 ${settings.periodDays} 天的退款订单。`;
 }
 
-function triggerDrawerSection(step, title, description, content, className = "") {
+function triggerDrawerSection(title, description, content, className = "") {
   return `<section class="policy-drawer-section trigger-section ${className}">
     <div class="policy-drawer-section-head trigger-section-head">
-      <span class="trigger-section-index">${step}</span>
       <div class="trigger-section-heading">
         <h3>${title}</h3>
         <p>${description}</p>
@@ -8137,8 +8120,8 @@ triggerDrawerContent = function triggerDrawerContentRefined() {
     </div>
     ${rules}
   </div>`;
-  return triggerDrawerSection("01", "统计范围", "设置累计退款指标的账号回看周期", period, "trigger-period-section")
-    + triggerDrawerSection("02", "封禁条件", "配置条件关系与退款阈值", conditions, "trigger-condition-section");
+  return triggerDrawerSection("统计范围", "设置累计退款指标的账号回看周期", period, "trigger-period-section")
+    + triggerDrawerSection("封禁条件", "配置条件关系与退款阈值", conditions, "trigger-condition-section");
 };
 
 policyV2State.recoverySettings = {
