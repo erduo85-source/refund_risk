@@ -24,6 +24,9 @@
 | 文档一致性 | 后台 README 提到 `版本2.html`、`版本3.html`、`版本4.html`，但当前目录未发现这些文件；`index.html` 标题为“版本4”，后续审计时需修正文档或文件说明 |
 | 目标远端 | `git ls-remote` 返回成功且无引用，目标 GitHub 仓库为空，不存在需合并或覆盖的远端历史 |
 | GitHub 身份 | 已重新认证账号 `erduo85-source`；公开名称 `ZaneZan`、公开邮箱 `erduo85@gmail.com`，令牌具备 `repo` 权限 |
+| 本地提交身份 | 仅在本仓库配置为 `ZaneZan <erduo85@gmail.com>`，未改动全局 Git 身份 |
+| Git 基线 | 首个提交为 `b8fc247`（`chore: establish refund risk prototype baseline`） |
+| 远端同步 | 已配置 `origin` 为目标仓库，并成功建立、跟踪 `origin/master` |
 
 ## 技术与流程决策
 
@@ -38,7 +41,6 @@
 
 - 当前可演示页面与核心流程完成度。
 - 用户后续逐项指出的具体瑕疵及优先级。
-- 指定 GitHub 仓库的默认分支与当前远端内容情况。
 
 ## 问题记录
 
