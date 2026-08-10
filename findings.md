@@ -472,6 +472,16 @@
 - 已知本地 `file://` 页面读取会被 Browser URL 策略拒绝，本轮未重复尝试；实际标签消失后的指标间距需手动刷新复验。
 - 功能提交：`baf5eaa`（`fix: remove manual payment badge`）。
 
+## 2026-08-10 / 封禁触发规则序号移除批注结论
+
+- 移除“统计范围”和“封禁条件”标题前的 `01/02` 序号节点。
+- 删除仅供序号使用的 `.trigger-section-index` 样式，并回收标题头部原有的 12px 序号间距。
+- 精简 `triggerDrawerSection()` 参数，不再传递或渲染无效的 `step`。
+- 两个模块名称、条件关系、统计周期、三条规则阈值和保存逻辑保持不变。
+- Node.js 内联脚本解析通过；序号清理、两个模块、模块标题、旧调用移除及配置控件保留共 10 项断言全部通过；`git diff --check` 通过。
+- 本轮未重复请求已被 URL 策略禁止的本地 `file://` DOM 读取；实际标题起始位置和抽屉滚动仍需手动刷新复验。
+- 功能提交：`5cd3359`（`fix: remove trigger section numbering`）。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
