@@ -3189,6 +3189,41 @@ svg {
   padding: 16px 0;
 }
 
+.policy-dependent-field {
+  margin: 0 0 16px 28px;
+  padding: 14px;
+  background: #f7fbff;
+  border: 1px solid #bae0ff;
+  border-radius: 8px;
+}
+
+.policy-dependent-field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: #102a43;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.policy-dependent-field-label .required-mark {
+  color: var(--danger);
+}
+
+.policy-field-hint {
+  margin: 7px 0 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.policy-field-error {
+  margin: 5px 0 0;
+  color: var(--danger);
+  font-size: 11px;
+}
+
 .policy-drawer-footer {
   min-height: 72px;
   padding: 12px 20px;
@@ -7098,11 +7133,11 @@ const policyV2Cards = {
   },
   recovery: {
     title: "补款解封规则",
-    subtitle: "定义补款金额及解封方式",
+    subtitle: "配置补款方式及解封规则",
     icon: "unlock",
     color: "#389e0d",
     bg: "#f6ffed",
-    summary: [["补款方式", "补足全部"], ["最低补款", "¥30"], ["达标后", "自动解封"]],
+    summary: [["补款方式", "网页自助补款"], ["补款地址", "已配置"], ["解封规则", "自动解封"]],
   },
   channels: {
     title: "渠道接入状态",
@@ -7735,24 +7770,123 @@ triggerDrawerContent = function triggerDrawerContentRefined() {
     + drawerSection("低额退款豁免", "减少低价值订单导致的误拦截", exemption);
 };
 
+policyV2State.recoverySettings = {
+  paymentMethod: "web",
+  paymentUrl: "https://pay.example.com/refund/nebula",
+  unlockRule: "auto",
+};
+
+function escapePolicyAttribute(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 recoveryDrawerContent = function recoveryDrawerContentRefined() {
-  const handling = `<div class="radio-stack">
-    <label class="radio-option selected"><input class="policy-drawer-input" type="radio" name="v3-recovery" value="auto" checked><span><strong>补款完成后自动解封</strong><span>用户补款达到详情页单独设置的金额后，系统自动恢复登录</span></span></label>
-    <label class="radio-option"><input class="policy-drawer-input" type="radio" name="v3-recovery" value="manual"><span><strong>补款完成后人工审核</strong><span>达到设置金额后进入待审核列表，由运营确认是否解封</span></span></label>
+  const settings = policyV2State.recoverySettings;
+  const isWeb = settings.paymentMethod === "web";
+  const paymentMethods = `<div class="radio-stack">
+    <label class="radio-option ${settings.paymentMethod === "service" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-payment-method" value="service" ${settings.paymentMethod === "service" ? "checked" : ""}><span><strong>联系客服补款</strong><span>玩家通过客服渠道完成补款，由客服核验到账结果</span></span></label>
+    <label class="radio-option ${isWeb ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-payment-method" value="web" ${isWeb ? "checked" : ""}><span><strong>网页自助补款</strong><span>玩家打开补款页面自主完成支付，到账结果自动回传</span></span></label>
+  </div>
+  <div class="policy-dependent-field" id="recoveryPaymentAddressField" ${isWeb ? "" : "hidden"}>
+    <label class="policy-dependent-field-label" for="recoveryPaymentAddress">补款地址 <span class="required-mark" aria-hidden="true">*</span></label>
+    <input class="input policy-drawer-input" id="recoveryPaymentAddress" type="url" value="${escapePolicyAttribute(settings.paymentUrl)}" placeholder="请输入网页自助补款地址" aria-describedby="recoveryPaymentAddressHint recoveryPaymentAddressError">
+    <p class="policy-field-hint" id="recoveryPaymentAddressHint">补款地址可在充值中心后台配置网页支付后获取</p>
+    <p class="policy-field-error" id="recoveryPaymentAddressError" role="alert" hidden></p>
   </div>`;
-  const repeatedRefund = policyRuleRow("二次退款加重处理", "已补款解封用户再次退款时转为人工审核", `<label class="switch"><input class="policy-drawer-input" type="checkbox" checked aria-label="二次退款加重处理"><span class="switch-track"></span></label>`);
-  return drawerSection("补款金额计算", "补款金额在受控用户详情中按用户单独设置", handling)
-    + drawerSection("重复退款处理", "控制已解封用户再次退款后的处置方式", repeatedRefund);
+  const unlockRules = `<div class="radio-stack">
+    <label class="radio-option ${settings.unlockRule === "auto" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-unlock-rule" value="auto" ${settings.unlockRule === "auto" ? "checked" : ""}><span><strong>补款后自动解封</strong><span>补款达到用户详情中单独设置的金额后，系统自动恢复登录</span></span></label>
+    <label class="radio-option ${settings.unlockRule === "manual" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-unlock-rule" value="manual" ${settings.unlockRule === "manual" ? "checked" : ""}><span><strong>补款后人工审核</strong><span>补款达到设置金额后进入待审核列表，由运营确认是否解封</span></span></label>
+  </div>`;
+  return drawerSection("补款方式", "选择玩家完成补款的入口", paymentMethods)
+    + drawerSection("解封规则", "配置补款达标后的账号处理方式", unlockRules);
 };
 
 policyV3NaturalDescriptions.trigger = "单笔退款达到 <strong>¥128</strong> 时触发封禁；累计退款金额和退款笔数可分别选择 7 至 360 天的统计周期。";
-policyV3NaturalDescriptions.recovery = "补款金额在用户详情中<strong>按用户单独设置</strong>；达到指定金额后自动解封，也可选择进入人工审核。";
+policyV3NaturalDescriptions.recovery = "支持<strong>联系客服补款</strong>或<strong>网页自助补款</strong>；补款达标后可自动解封或进入人工审核。";
+
+function syncRecoveryPaymentAddress() {
+  const method = document.querySelector('input[name="v4-payment-method"]:checked')?.value;
+  const field = document.getElementById("recoveryPaymentAddressField");
+  const input = document.getElementById("recoveryPaymentAddress");
+  if (!field || !input) return;
+  const showAddress = method === "web";
+  field.hidden = !showAddress;
+  input.required = showAddress;
+  input.classList.remove("invalid");
+  input.setAttribute("aria-invalid", "false");
+  const error = document.getElementById("recoveryPaymentAddressError");
+  if (error) {
+    error.hidden = true;
+    error.textContent = "";
+  }
+}
+
+function bindRecoverySettingsEvents() {
+  document.querySelectorAll('input[name="v4-payment-method"]').forEach((input) => {
+    input.addEventListener("change", syncRecoveryPaymentAddress);
+  });
+  document.getElementById("recoveryPaymentAddress")?.addEventListener("input", (event) => {
+    event.currentTarget.classList.remove("invalid");
+    event.currentTarget.setAttribute("aria-invalid", "false");
+    const error = document.getElementById("recoveryPaymentAddressError");
+    if (error) {
+      error.hidden = true;
+      error.textContent = "";
+    }
+  });
+  syncRecoveryPaymentAddress();
+}
 
 const openPolicyDrawerBeforeRefinement = openPolicyDrawer;
 openPolicyDrawer = function openPolicyDrawerRefined(key, trigger) {
   document.querySelectorAll(".policy-summary-card.selected").forEach((card) => card.classList.remove("selected"));
   if (trigger?.classList.contains("policy-summary-card")) trigger.classList.add("selected");
   openPolicyDrawerBeforeRefinement(key, trigger);
+  if (key === "recovery") bindRecoverySettingsEvents();
+};
+
+const savePolicyDrawerBeforeRecoveryRefinement = savePolicyDrawer;
+savePolicyDrawer = function savePolicyDrawerRecoveryRefined() {
+  if (policyV2State.activeCard !== "recovery") {
+    savePolicyDrawerBeforeRecoveryRefinement();
+    return;
+  }
+  const paymentMethod = document.querySelector('input[name="v4-payment-method"]:checked')?.value || "service";
+  const unlockRule = document.querySelector('input[name="v4-unlock-rule"]:checked')?.value || "auto";
+  const addressInput = document.getElementById("recoveryPaymentAddress");
+  const addressError = document.getElementById("recoveryPaymentAddressError");
+  const paymentUrl = addressInput?.value.trim() || "";
+  let validAddress = paymentMethod !== "web";
+  if (paymentMethod === "web" && paymentUrl) {
+    try {
+      const parsedUrl = new URL(paymentUrl);
+      validAddress = parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+    } catch {
+      validAddress = false;
+    }
+  }
+  if (!validAddress) {
+    const message = paymentUrl ? "请输入有效的 http 或 https 补款地址" : "请输入网页自助补款地址";
+    addressInput?.classList.add("invalid");
+    addressInput?.setAttribute("aria-invalid", "true");
+    if (addressError) {
+      addressError.textContent = message;
+      addressError.hidden = false;
+    }
+    addressInput?.focus();
+    showToast("请完善补款地址", message, "warning");
+    return;
+  }
+  policyV2State.recoverySettings = {
+    paymentMethod,
+    paymentUrl,
+    unlockRule,
+  };
+  savePolicyDrawerBeforeRecoveryRefinement();
 };
 
 const closePolicyDrawerBeforeRefinement = closePolicyDrawer;
