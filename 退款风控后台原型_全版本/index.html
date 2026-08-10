@@ -3189,15 +3189,31 @@ svg {
   padding: 16px 0;
 }
 
-.policy-dependent-field {
-  margin: 0 0 16px 28px;
-  padding: 14px;
-  background: #f7fbff;
-  border: 1px solid #bae0ff;
-  border-radius: 8px;
+.payment-method-option {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
 }
 
-.policy-dependent-field-label {
+.payment-method-option > input[type="radio"] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.payment-method-copy {
+  grid-column: 2;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.payment-method-address {
+  grid-column: 2;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d6e4ff;
+}
+
+.payment-method-address-label {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -3207,7 +3223,9 @@ svg {
   font-weight: 550;
 }
 
-.policy-dependent-field-label .required-mark {
+.payment-method-address-label .required-mark {
+  display: inline;
+  margin: 0;
   color: var(--danger);
 }
 
@@ -7828,14 +7846,20 @@ recoveryDrawerContent = function recoveryDrawerContentRefined() {
   const settings = policyV2State.recoverySettings;
   const isWeb = settings.paymentMethod === "web";
   const paymentMethods = `<div class="radio-stack">
-    <label class="radio-option ${settings.paymentMethod === "service" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-payment-method" value="service" ${settings.paymentMethod === "service" ? "checked" : ""}><span><strong>联系客服补款</strong><span>玩家通过客服渠道完成补款，由客服核验到账结果</span></span></label>
-    <label class="radio-option ${isWeb ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-payment-method" value="web" ${isWeb ? "checked" : ""}><span><strong>网页自助补款</strong><span>玩家打开补款页面自主完成支付，到账结果自动回传</span></span></label>
-  </div>
-  <div class="policy-dependent-field" id="recoveryPaymentAddressField" ${isWeb ? "" : "hidden"}>
-    <label class="policy-dependent-field-label" for="recoveryPaymentAddress">补款地址 <span class="required-mark" aria-hidden="true">*</span></label>
-    <input class="input policy-drawer-input" id="recoveryPaymentAddress" type="url" value="${escapePolicyAttribute(settings.paymentUrl)}" placeholder="请输入网页自助补款地址" aria-describedby="recoveryPaymentAddressHint recoveryPaymentAddressError">
-    <p class="policy-field-hint" id="recoveryPaymentAddressHint">补款地址可在充值中心后台配置网页支付后获取</p>
-    <p class="policy-field-error" id="recoveryPaymentAddressError" role="alert" hidden></p>
+    <div class="radio-option payment-method-option ${settings.paymentMethod === "service" ? "selected" : ""}">
+      <input class="policy-drawer-input" id="paymentMethodService" type="radio" name="v4-payment-method" value="service" ${settings.paymentMethod === "service" ? "checked" : ""}>
+      <label class="payment-method-copy" for="paymentMethodService"><strong>联系客服补款</strong><span>玩家通过客服渠道完成补款，由客服核验到账结果</span></label>
+    </div>
+    <div class="radio-option payment-method-option ${isWeb ? "selected" : ""}">
+      <input class="policy-drawer-input" id="paymentMethodWeb" type="radio" name="v4-payment-method" value="web" ${isWeb ? "checked" : ""}>
+      <label class="payment-method-copy" for="paymentMethodWeb"><strong>网页自助补款</strong><span>玩家打开补款页面自主完成支付，到账结果自动回传</span></label>
+      <div class="payment-method-address" id="recoveryPaymentAddressField" ${isWeb ? "" : "hidden"}>
+        <div class="payment-method-address-label">补款地址 <span class="required-mark" aria-hidden="true">*</span></div>
+        <input class="input policy-drawer-input" id="recoveryPaymentAddress" type="url" value="${escapePolicyAttribute(settings.paymentUrl)}" placeholder="请输入网页自助补款地址" aria-label="补款地址" aria-describedby="recoveryPaymentAddressHint recoveryPaymentAddressError">
+        <p class="policy-field-hint" id="recoveryPaymentAddressHint">补款地址可在充值中心后台配置网页支付后获取</p>
+        <p class="policy-field-error" id="recoveryPaymentAddressError" role="alert" hidden></p>
+      </div>
+    </div>
   </div>`;
   const unlockRules = `<div class="radio-stack">
     <label class="radio-option ${settings.unlockRule === "auto" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-unlock-rule" value="auto" ${settings.unlockRule === "auto" ? "checked" : ""}><span><strong>补款后自动解封</strong><span>补款达到用户详情中单独设置的金额后，系统自动恢复登录</span></span></label>
