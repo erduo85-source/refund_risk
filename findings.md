@@ -404,6 +404,15 @@
 - 本轮未重复请求已被 URL 策略禁止的本地 `file://` DOM 读取；实际标签宽度和移动端换行仍需手动刷新复验。
 - 功能提交：`ca1a980`（`fix: rename controlled user risk badge`）。
 
+## 2026-08-10 / 操作日志数量文案精简批注结论
+
+- 日志明细工具栏由“共 N 条 · 保留最近 180 天”精简为“共 N 条”。
+- 数量继续使用 `logs.length` 动态计算，随操作类型、操作人和操作时间筛选结果更新。
+- 仅修改工具栏文案，不调整数据保留逻辑、筛选条件、表格结构、容器或响应式规则。
+- Node.js 内联脚本解析、动态数量、旧文案移除、工具栏标题和筛选/表格保留共 5 项断言全部通过；`git diff --check` 通过。
+- 本轮未重复请求已被 URL 策略禁止的本地 `file://` DOM 读取；实际工具栏间距仍需手动刷新复验。
+- 功能提交：`bff6fed`（`fix: simplify audit log count label`）。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
