@@ -3710,6 +3710,10 @@ svg {
   grid-template-columns: minmax(280px, 1.4fr) minmax(360px, 1fr) auto;
 }
 
+#page-audit .filter-row {
+  grid-template-columns: minmax(180px, 0.7fr) minmax(180px, 0.7fr) minmax(420px, 1.6fr) auto;
+}
+
 #page-refunds .data-table {
   min-width: 1120px;
 }
@@ -4305,21 +4309,25 @@ svg {
 }
 
 @media (max-width: 1180px) {
-  #page-refunds .filter-row {
+  #page-refunds .filter-row,
+  #page-audit .filter-row {
     grid-template-columns: minmax(280px, 1fr) minmax(320px, 1fr);
   }
 
-  #page-refunds .filter-actions {
+  #page-refunds .filter-actions,
+  #page-audit .filter-actions {
     grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 700px) {
-  #page-refunds .filter-row {
+  #page-refunds .filter-row,
+  #page-audit .filter-row {
     grid-template-columns: 1fr;
   }
 
-  #page-refunds .filter-actions {
+  #page-refunds .filter-actions,
+  #page-audit .filter-actions {
     grid-column: auto;
   }
 
@@ -5134,6 +5142,16 @@ const baseUsers = [
   },
 ];
 
+const auditLogs = [
+  { time: "2026-07-29 14:32:08", operator: "系统", type: "账号封禁", target: "Starlord_77 / U-87924130", detail: "命中累计退款金额规则", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 14:18:23", operator: "林晓", type: "策略修改", target: "封禁触发规则", detail: "累计退款笔数 3 → 2", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 13:48:51", operator: "系统", type: "补款金额修改", target: "飞行的橘子 / U-50192847", detail: "解封补款金额调整为 ¥200.00", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 12:16:04", operator: "系统", type: "账号解封", target: "Ares_Lee / U-79241650", detail: "补款已达到解封阈值", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 11:06:19", operator: "周岚", type: "账号封禁", target: "MoonRabbit / U-29410586", detail: "高频退款并消耗虚拟资产", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 10:01:42", operator: "系统", type: "策略修改", target: "补款解封规则", detail: "解封方式调整为补款完成后自动解封", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 09:54:11", operator: "系统", type: "账号解封", target: "Kay_Dragon / U-43018726", detail: "补款 ¥648.00 已到账", result: "成功", resultClass: "success" },
+];
+
 const state = {
   page: "users",
   project: "nebula",
@@ -5148,6 +5166,11 @@ const state = {
   refundRangePreset: 7,
   refundStart: "2026-07-23T00:00:00",
   refundEnd: "2026-07-29T23:59:59",
+  auditTypeFilter: "all",
+  auditOperatorFilter: "all",
+  auditRangePreset: 7,
+  auditStart: "2026-07-23T00:00:00",
+  auditEnd: "2026-07-29T23:59:59",
   activeDrawerUser: null,
   modalAction: null,
   modalTargets: [],
@@ -5159,6 +5182,13 @@ const refundDateDraft = {
   end: state.refundEnd,
   active: "start",
   viewDate: state.refundStart.slice(0, 10),
+};
+
+const auditDateDraft = {
+  start: state.auditStart,
+  end: state.auditEnd,
+  active: "start",
+  viewDate: state.auditStart.slice(0, 10),
 };
 
 const statusMap = {
@@ -5940,48 +5970,321 @@ function renderConfig() {
   bindConfigEvents();
 }
 
+function getLatestAuditDate() {
+  const dates = auditLogs.map((log) => log.time.slice(0, 10)).sort();
+  return dates[dates.length - 1] || "2026-07-29";
+}
+
+function updateAuditPreset(days) {
+  const endValue = getLatestAuditDate();
+  const startDate = new Date(`${endValue}T00:00:00`);
+  startDate.setDate(startDate.getDate() - days + 1);
+  state.auditRangePreset = days;
+  state.auditStart = `${formatDateInput(startDate)}T00:00:00`;
+  state.auditEnd = `${endValue}T23:59:59`;
+}
+
+function syncAuditDateDraft(active = "start") {
+  const fallbackDate = getLatestAuditDate();
+  auditDateDraft.start = normalizeRefundDateTime(state.auditStart, fallbackDate, false);
+  auditDateDraft.end = normalizeRefundDateTime(state.auditEnd, fallbackDate, true);
+  auditDateDraft.active = active;
+  auditDateDraft.viewDate = auditDateDraft[active].slice(0, 10);
+}
+
+function getAuditDateTimeParts(value) {
+  const normalized = normalizeRefundDateTime(value, getLatestAuditDate());
+  const [datePart, timePart] = normalized.split("T");
+  const [hour, minute, second] = timePart.split(":").map(Number);
+  return { datePart, hour, minute, second };
+}
+
+function setAuditDraftDate(dateValue) {
+  const active = auditDateDraft.active;
+  const current = normalizeRefundDateTime(auditDateDraft[active], dateValue, active === "end");
+  auditDateDraft[active] = `${dateValue}T${current.split("T")[1]}`;
+  if (active === "start") {
+    if (auditDateDraft.start > auditDateDraft.end) {
+      auditDateDraft.end = `${dateValue}T23:59:59`;
+    }
+    auditDateDraft.active = "end";
+  } else if (auditDateDraft.end < auditDateDraft.start) {
+    const previousStart = auditDateDraft.start;
+    auditDateDraft.start = auditDateDraft.end;
+    auditDateDraft.end = previousStart;
+  }
+}
+
+function setAuditDraftTime(unit, value) {
+  const active = auditDateDraft.active;
+  const parts = getAuditDateTimeParts(auditDateDraft[active]);
+  parts[unit] = Number(value);
+  const pad = (number) => String(number).padStart(2, "0");
+  auditDateDraft[active] = `${parts.datePart}T${pad(parts.hour)}:${pad(parts.minute)}:${pad(parts.second)}`;
+}
+
+function shiftAuditCalendar(monthOffset) {
+  const viewDate = new Date(`${auditDateDraft.viewDate}T00:00:00`);
+  viewDate.setDate(1);
+  viewDate.setMonth(viewDate.getMonth() + monthOffset);
+  auditDateDraft.viewDate = formatDateInput(viewDate);
+}
+
+function renderAuditCalendarDays() {
+  const view = new Date(`${auditDateDraft.viewDate}T00:00:00`);
+  const year = view.getFullYear();
+  const month = view.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const mondayOffset = (firstDay.getDay() + 6) % 7;
+  const startDate = new Date(year, month, 1 - mondayOffset);
+  const startKey = auditDateDraft.start.slice(0, 10);
+  const endKey = auditDateDraft.end.slice(0, 10);
+  const todayKey = formatDateInput(new Date());
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + index);
+    const dateKey = formatDateInput(date);
+    const classes = ["date-picker-day"];
+    if (date.getMonth() !== month) classes.push("outside");
+    if (dateKey > startKey && dateKey < endKey) classes.push("in-range");
+    if (dateKey === startKey || dateKey === endKey) classes.push("selected");
+    if (dateKey === todayKey) classes.push("today");
+    return `<button class="${classes.join(" ")}" type="button" data-audit-day="${dateKey}" aria-label="选择 ${dateKey}"><span>${date.getDate()}</span></button>`;
+  }).join("");
+}
+
+function renderAuditTimeOptions(unit, count, selectedValue) {
+  return Array.from({ length: count }, (_, value) => `<button class="time-picker-option ${value === selectedValue ? "selected" : ""}" type="button" data-audit-time-unit="${unit}" data-audit-time-value="${value}">${String(value).padStart(2, "0")}</button>`).join("");
+}
+
+function renderAuditDatePickerMarkup() {
+  const view = new Date(`${auditDateDraft.viewDate}T00:00:00`);
+  const activeParts = getAuditDateTimeParts(auditDateDraft[auditDateDraft.active]);
+  const pad = (number) => String(number).padStart(2, "0");
+  const timeLabel = `${pad(activeParts.hour)}:${pad(activeParts.minute)}:${pad(activeParts.second)}`;
+  return `
+    <div class="date-picker-calendar">
+      <div class="date-picker-header">
+        <button class="picker-nav-button previous double" type="button" data-audit-month="-12" aria-label="上一年">${icon("chevron")}${icon("chevron")}</button>
+        <button class="picker-nav-button previous" type="button" data-audit-month="-1" aria-label="上个月">${icon("chevron")}</button>
+        <strong>${view.getFullYear()} 年 ${view.getMonth() + 1} 月</strong>
+        <button class="picker-nav-button" type="button" data-audit-month="1" aria-label="下个月">${icon("chevron")}</button>
+        <button class="picker-nav-button double" type="button" data-audit-month="12" aria-label="下一年">${icon("chevron")}${icon("chevron")}</button>
+      </div>
+      <div class="date-picker-body">
+        <div class="date-picker-weekdays" aria-hidden="true">${["一", "二", "三", "四", "五", "六", "日"].map((day) => `<span>${day}</span>`).join("")}</div>
+        <div class="date-picker-days">${renderAuditCalendarDays()}</div>
+      </div>
+    </div>
+    <div class="time-picker-pane">
+      <div class="time-picker-header"><span>${auditDateDraft.active === "start" ? "开始" : "结束"}</span><strong>${timeLabel}</strong></div>
+      <div class="time-picker-columns">
+        <div class="time-picker-column" aria-label="小时">${renderAuditTimeOptions("hour", 24, activeParts.hour)}</div>
+        <div class="time-picker-column" aria-label="分钟">${renderAuditTimeOptions("minute", 60, activeParts.minute)}</div>
+        <div class="time-picker-column" aria-label="秒">${renderAuditTimeOptions("second", 60, activeParts.second)}</div>
+      </div>
+    </div>
+    <div class="date-picker-footer">
+      <button class="date-picker-today" type="button" data-audit-today>今天</button>
+      <span class="muted">当前选择：${auditDateDraft.active === "start" ? "开始时间" : "结束时间"}</span>
+      <span class="footer-spacer"></span>
+      <button class="button secondary" id="cancelAuditRange" type="button">取消</button>
+      <button class="button" id="confirmAuditRange" type="button">确定</button>
+    </div>`;
+}
+
+function refreshAuditDatePickerPanel() {
+  const panel = document.getElementById("auditDatePickerPanel");
+  if (!panel) return;
+  panel.innerHTML = renderAuditDatePickerMarkup();
+  panel.querySelectorAll(".time-picker-option.selected").forEach((button) => {
+    const column = button.closest(".time-picker-column");
+    if (column) column.scrollTop = Math.max(0, button.offsetTop - 84);
+  });
+}
+
+function openAuditDatePopover(active = "start") {
+  syncAuditDateDraft(active);
+  refreshAuditDatePickerPanel();
+  const popover = document.getElementById("auditDatePopover");
+  const trigger = document.getElementById("auditDateTrigger");
+  if (popover) popover.hidden = false;
+  if (trigger) trigger.setAttribute("aria-expanded", "true");
+}
+
+function closeAuditDatePopover() {
+  const popover = document.getElementById("auditDatePopover");
+  const trigger = document.getElementById("auditDateTrigger");
+  if (popover) popover.hidden = true;
+  if (trigger) trigger.setAttribute("aria-expanded", "false");
+}
+
+function getFilteredAuditLogs() {
+  return auditLogs.filter((log) => {
+    const typeHit = state.auditTypeFilter === "all" || log.type === state.auditTypeFilter;
+    const operatorHit = state.auditOperatorFilter === "all" || log.operator === state.auditOperatorFilter;
+    const logTime = log.time.replace(" ", "T");
+    const startHit = !state.auditStart || logTime >= state.auditStart;
+    const endHit = !state.auditEnd || logTime <= state.auditEnd;
+    return typeHit && operatorHit && startHit && endHit;
+  });
+}
+
+function renderAuditRows(logs) {
+  if (!logs.length) {
+    return `<tr><td colspan="6"><div class="empty-state"><strong>暂无符合条件的操作日志</strong><span>请调整操作类型、操作人或操作时间后重试</span></div></td></tr>`;
+  }
+  return logs.map((log) => `<tr>
+    <td><span class="money">${log.time}</span></td>
+    <td>${log.operator}</td>
+    <td>${log.type}</td>
+    <td>${log.target}</td>
+    <td>${log.detail}</td>
+    <td><span class="status-tag ${log.resultClass}">${log.result}</span></td>
+  </tr>`).join("");
+}
+
 function renderAudit() {
-  const logs = [
-    ["2026-07-29 14:32:08", "系统", "自动封禁", "Starlord_77 / U-87924130", "命中累计退款金额规则", "success"],
-    ["2026-07-29 14:18:23", "林晓", "修改策略", "封禁触发规则", "累计退款笔数 3 → 2", "success"],
-    ["2026-07-29 13:48:51", "系统", "补款确认", "飞行的橘子 / U-50192847", "已补 ¥128.00，仍需 ¥200.00", "pending"],
-    ["2026-07-29 12:16:04", "系统", "自动解封", "Ares_Lee / U-79241650", "补款已达到解封阈值", "success"],
-    ["2026-07-29 11:06:19", "周岚", "手动封禁", "MoonRabbit / U-29410586", "高频退款并消耗虚拟资产", "success"],
-    ["2026-07-29 10:01:42", "系统", "渠道重试", "Google Play 同步任务", "第 2 次重试成功", "success"],
-    ["2026-07-29 09:54:11", "系统", "自动解封", "Kay_Dragon / U-43018726", "补款 ¥648.00 已到账", "success"],
-  ];
+  const logs = getFilteredAuditLogs();
   document.getElementById("page-audit").innerHTML = `
     ${pageHeading(
       "auditTitle",
       "操作日志",
-      `记录策略、封禁、解封与渠道同步操作 · ${projects[state.project].name}`,
+      `记录策略修改、账号封禁、账号解封与补款金额修改操作 · ${projects[state.project].name}`,
       `<button class="button" type="button" data-action="export">${icon("export")}导出日志</button>`,
     )}
-    <section class="card filter-card">
+    <section class="card filter-card" aria-label="操作日志筛选条件">
       <div class="filter-row">
         <div class="filter-group">
-          <label for="auditSearch">搜索日志</label>
-          <div class="input-wrap"><span class="prefix-icon">${icon("search")}</span><input class="input" id="auditSearch" type="search" placeholder="操作人 / 用户 UID / 操作内容"></div>
+          <label for="auditType">操作类型</label>
+          <select class="select" id="auditType">
+            <option value="all" ${state.auditTypeFilter === "all" ? "selected" : ""}>全部操作</option>
+            <option value="策略修改" ${state.auditTypeFilter === "策略修改" ? "selected" : ""}>策略修改</option>
+            <option value="账号封禁" ${state.auditTypeFilter === "账号封禁" ? "selected" : ""}>账号封禁</option>
+            <option value="账号解封" ${state.auditTypeFilter === "账号解封" ? "selected" : ""}>账号解封</option>
+            <option value="补款金额修改" ${state.auditTypeFilter === "补款金额修改" ? "selected" : ""}>补款金额修改</option>
+          </select>
         </div>
-        <div class="filter-group"><label for="auditType">操作类型</label><select class="select" id="auditType"><option>全部操作</option><option>封禁</option><option>解封</option><option>策略修改</option><option>渠道同步</option></select></div>
-        <div class="filter-group"><label for="auditOperator">操作人</label><select class="select" id="auditOperator"><option>全部</option><option>系统</option><option>林晓</option><option>周岚</option></select></div>
-        <div class="filter-actions"><button class="button" type="button" data-action="audit-query">${icon("filter")}查询</button></div>
+        <div class="filter-group">
+          <label for="auditOperator">操作人</label>
+          <select class="select" id="auditOperator">
+            <option value="all" ${state.auditOperatorFilter === "all" ? "selected" : ""}>全部</option>
+            <option value="系统" ${state.auditOperatorFilter === "系统" ? "selected" : ""}>系统</option>
+            <option value="林晓" ${state.auditOperatorFilter === "林晓" ? "selected" : ""}>林晓</option>
+            <option value="周岚" ${state.auditOperatorFilter === "周岚" ? "selected" : ""}>周岚</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label id="auditDateLabel">操作时间</label>
+          <div class="date-range-picker">
+            <button class="date-range-trigger" id="auditDateTrigger" type="button" aria-expanded="false" aria-controls="auditDatePopover">
+              <span class="range-part" data-audit-range-field="start">${state.auditStart ? state.auditStart.replace("T", " ") : "开始时间"}</span>
+              <span class="range-arrow" aria-hidden="true">${icon("arrow")}</span>
+              <span class="range-part" data-audit-range-field="end">${state.auditEnd ? state.auditEnd.replace("T", " ") : "结束时间"}</span>
+              <span class="range-calendar-icon" aria-hidden="true"></span>
+            </button>
+            <div class="date-range-popover" id="auditDatePopover" role="dialog" aria-labelledby="auditDateLabel" hidden>
+              <div class="refund-range-shortcuts" aria-label="操作时间快捷选项">
+                <strong>快捷选择</strong>
+                ${[3, 7, 30].map((days) => `<button class="${state.auditRangePreset === days ? "active" : ""}" type="button" data-audit-range="${days}">近${days}天</button>`).join("")}
+              </div>
+              <div class="datetime-picker-panel" id="auditDatePickerPanel"></div>
+            </div>
+          </div>
+        </div>
+        <div class="filter-actions"><button class="button" id="applyAuditFilters" type="button">${icon("filter")}查询</button></div>
       </div>
     </section>
     <section class="card">
-      <div class="table-toolbar"><strong>日志明细</strong><span class="muted">保留最近 180 天</span></div>
+      <div class="table-toolbar"><strong>日志明细</strong><span class="muted">共 ${logs.length} 条 · 保留最近 180 天</span></div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr><th>操作时间</th><th>操作人</th><th>操作类型</th><th>操作对象</th><th>详情</th><th>结果</th></tr></thead>
-          <tbody>${logs
-            .map(
-              (log) => `<tr><td><span class="money">${log[0]}</span></td><td>${log[1]}</td><td>${log[2]}</td><td>${log[3]}</td><td>${log[4]}</td><td><span class="status-tag ${log[5]}">成功</span></td></tr>`,
-            )
-            .join("")}</tbody>
+          <tbody>${renderAuditRows(logs)}</tbody>
         </table>
       </div>
     </section>
   `;
+  bindAuditEvents();
+}
+
+function bindAuditEvents() {
+  document.getElementById("applyAuditFilters")?.addEventListener("click", () => {
+    state.auditTypeFilter = document.getElementById("auditType")?.value || "all";
+    state.auditOperatorFilter = document.getElementById("auditOperator")?.value || "all";
+    renderAudit();
+    showToast("查询完成", `已找到 ${getFilteredAuditLogs().length} 条操作日志`, "info");
+  });
+
+  const trigger = document.getElementById("auditDateTrigger");
+  const popover = document.getElementById("auditDatePopover");
+  trigger?.addEventListener("click", (event) => {
+    const requestedField = event.target.closest("[data-audit-range-field]")?.dataset.auditRangeField || "start";
+    if (popover.hidden) {
+      openAuditDatePopover(requestedField);
+      return;
+    }
+    auditDateDraft.active = requestedField;
+    auditDateDraft.viewDate = auditDateDraft[requestedField].slice(0, 10);
+    refreshAuditDatePickerPanel();
+  });
+
+  popover?.addEventListener("click", (event) => {
+    const shortcut = event.target.closest("[data-audit-range]");
+    if (shortcut) {
+      const days = Number(shortcut.dataset.auditRange);
+      updateAuditPreset(days);
+      renderAudit();
+      showToast("操作时间已更新", `已筛选近${days}天日志`, "info");
+      return;
+    }
+
+    const monthButton = event.target.closest("[data-audit-month]");
+    if (monthButton) {
+      shiftAuditCalendar(Number(monthButton.dataset.auditMonth));
+      refreshAuditDatePickerPanel();
+      return;
+    }
+
+    const dayButton = event.target.closest("[data-audit-day]");
+    if (dayButton) {
+      setAuditDraftDate(dayButton.dataset.auditDay);
+      auditDateDraft.viewDate = dayButton.dataset.auditDay;
+      refreshAuditDatePickerPanel();
+      return;
+    }
+
+    const timeButton = event.target.closest("[data-audit-time-unit]");
+    if (timeButton) {
+      setAuditDraftTime(timeButton.dataset.auditTimeUnit, timeButton.dataset.auditTimeValue);
+      refreshAuditDatePickerPanel();
+      return;
+    }
+
+    if (event.target.closest("[data-audit-today]")) {
+      const today = formatDateInput(new Date());
+      setAuditDraftDate(today);
+      auditDateDraft.viewDate = today;
+      refreshAuditDatePickerPanel();
+      return;
+    }
+
+    if (event.target.closest("#cancelAuditRange")) {
+      closeAuditDatePopover();
+      return;
+    }
+
+    if (!event.target.closest("#confirmAuditRange")) return;
+    if (auditDateDraft.start > auditDateDraft.end) {
+      showToast("时间区间无效", "开始日期不能晚于结束日期", "warning");
+      return;
+    }
+    state.auditRangePreset = null;
+    state.auditStart = auditDateDraft.start;
+    state.auditEnd = auditDateDraft.end;
+    renderAudit();
+    showToast("操作时间已更新", `${state.auditStart.replace("T", " ")} 至 ${state.auditEnd.replace("T", " ")}`, "info");
+  });
 }
 
 function renderAllPages() {
@@ -6534,7 +6837,10 @@ document.getElementById("projectSelect").addEventListener("change", (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  if (!event.target.closest(".date-range-picker")) closeRefundDatePopover();
+  if (!event.target.closest(".date-range-picker")) {
+    closeRefundDatePopover();
+    closeAuditDatePopover();
+  }
 
   const copyTarget = event.target.closest("[data-copy-value]");
   if (copyTarget) {
@@ -6608,8 +6914,10 @@ document.getElementById("helpBtn").addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
+  const auditDatePopover = document.getElementById("auditDatePopover");
   const refundDatePopover = document.getElementById("refundDatePopover");
-  if (refundDatePopover && !refundDatePopover.hidden) closeRefundDatePopover();
+  if (auditDatePopover && !auditDatePopover.hidden) closeAuditDatePopover();
+  else if (refundDatePopover && !refundDatePopover.hidden) closeRefundDatePopover();
   else if (document.getElementById("modalLayer").classList.contains("visible")) closeModal();
   else if (document.getElementById("detailDrawer").classList.contains("open")) closeDrawer();
   else closeMobileNav();
