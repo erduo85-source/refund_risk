@@ -393,6 +393,17 @@
 - 本轮未重复请求已被 URL 策略禁止的本地 `file://` DOM 读取；实际垂直对齐、按钮位置和手机端换行仍需手动刷新复验。
 - 功能提交：`af75bf3`（`fix: simplify policy status header`）。
 
+## 2026-08-10 / 受控用户风险状态文案批注结论
+
+- 受控用户页链路状态标签由“已开启用户风控”改为“已开启退款风控”。
+- 同时修改默认 HTML 模板和 `syncUserRiskStatusBadge()` 的开启模式分支，避免初次渲染短暂显示旧文案。
+- 修改仅作用于受控用户页的 `.scope-mode`；策略状态元数据、策略配置页、状态抽屉和 Toast 文案保持原样。
+- 监测与停用模式仍回退使用 `policyModeMeta` 的动态文案，并保留原颜色类。
+- 未修改标签容器或响应式样式，不新增断点。
+- Node.js 内联脚本解析、默认文案、动态文案、旧默认值移除、其他状态回退、样式类及全局作用域隔离共 9 项断言全部通过；`git diff --check` 通过。
+- 本轮未重复请求已被 URL 策略禁止的本地 `file://` DOM 读取；实际标签宽度和移动端换行仍需手动刷新复验。
+- 功能提交：`ca1a980`（`fix: rename controlled user risk badge`）。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
