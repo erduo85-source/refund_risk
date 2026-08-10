@@ -210,6 +210,7 @@
 - Node.js 已解析 1 段内联脚本；12 项静态断言全部通过，覆盖 Tab、累计补款、无头像、复制入口、蓝色条带、固定底栏、垂直时间轴、多订单列表和抽屉模式生命周期。
 - `git diff --check` 无空白错误。
 - in-app Browser 对本地 `file://` 页面的自动读取受 URL 策略限制；刷新后的视觉、横向滚动、复制反馈和底栏固定效果仍需本地人工复验。
+- 本批次功能与首轮留痕提交为 `ebb0d58`（`fix: refine controlled user drawer`），已推送至 `origin/master`。
 
 ## 资源
 
