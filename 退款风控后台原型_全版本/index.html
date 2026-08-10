@@ -3782,6 +3782,11 @@ svg {
   flex: 0 0 112px;
 }
 
+.policy-period-input {
+  width: 112px;
+  flex: 0 0 112px;
+}
+
 .policy-drawer .radio-option strong,
 .policy-drawer .radio-option span,
 .policy-drawer .status-choice-copy strong,
@@ -8098,7 +8103,10 @@ triggerDrawerContent = function triggerDrawerContentRefined() {
       <strong>账号退款统计周期</strong>
       <span>累计退款金额和累计退款笔数按该周期统计</span>
     </div>
-    <select class="select policy-period-select policy-drawer-input" id="triggerPeriodDays" aria-label="账号退款统计周期">${policyPeriodOptions(settings.periodDays)}</select>
+    <div class="number-field policy-period-input">
+      <input class="input number-input policy-drawer-input" id="triggerPeriodDays" type="number" value="${settings.periodDays}" min="7" max="360" step="1" inputmode="numeric" required aria-label="账号退款统计周期" aria-describedby="triggerPeriodHint" aria-invalid="false">
+      <span class="suffix">天</span>
+    </div>
   </div>
   <p class="policy-field-hint trigger-period-hint" id="triggerPeriodHint">统计该账号近 ${settings.periodDays} 天的退款订单</p>`;
   const rules = [
@@ -8169,13 +8177,21 @@ updateTriggerPolicySummary(policyV2State.triggerSettings);
 policyV3NaturalDescriptions.recovery = "支持<strong>联系客服补款</strong>或<strong>网页自助补款</strong>；补款达标后可自动解封或进入人工审核。";
 
 function syncTriggerPeriodHint() {
-  const period = Number(document.getElementById("triggerPeriodDays")?.value || 30);
+  const input = document.getElementById("triggerPeriodDays");
+  const period = Number(input?.value);
   const hint = document.getElementById("triggerPeriodHint");
-  if (hint) hint.textContent = `统计该账号近 ${period} 天的退款订单`;
+  if (!hint) return;
+  hint.textContent = Number.isInteger(period) && period >= 7 && period <= 360
+    ? `统计该账号近 ${period} 天的退款订单`
+    : "请输入 7 至 360 天的整数";
 }
 
 function bindTriggerSettingsEvents() {
-  document.getElementById("triggerPeriodDays")?.addEventListener("change", syncTriggerPeriodHint);
+  document.getElementById("triggerPeriodDays")?.addEventListener("input", (event) => {
+    event.currentTarget.classList.remove("invalid");
+    event.currentTarget.setAttribute("aria-invalid", "false");
+    syncTriggerPeriodHint();
+  });
   document.querySelectorAll("[data-trigger-threshold]").forEach((input) => {
     input.addEventListener("input", () => input.classList.remove("invalid"));
   });
@@ -8271,7 +8287,16 @@ savePolicyDrawer = function savePolicyDrawerTriggerRefined() {
     return;
   }
   const relation = document.querySelector('input[name="v4-trigger-relation"]:checked')?.value || "any";
-  const periodDays = Number(document.getElementById("triggerPeriodDays")?.value || 30);
+  const periodInput = document.getElementById("triggerPeriodDays");
+  const periodDays = Number(periodInput?.value);
+  if (!periodInput || periodInput.value === "" || !Number.isInteger(periodDays) || periodDays < 7 || periodDays > 360) {
+    periodInput?.classList.add("invalid");
+    periodInput?.setAttribute("aria-invalid", "true");
+    periodInput?.focus();
+    syncTriggerPeriodHint();
+    showToast("请完善封禁规则", "统计周期需填写 7 至 360 天的整数", "warning");
+    return;
+  }
   const thresholdInputs = Array.from(document.querySelectorAll("[data-trigger-threshold]"));
   const invalidInput = thresholdInputs.find((input) => {
     const value = Number(input.value);
