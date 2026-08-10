@@ -4176,10 +4176,6 @@ svg {
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="主导航">
         <nav class="nav-list" id="mainNav">
-          <button class="nav-item" data-page="overview" type="button">
-            <span class="nav-icon" data-icon="overview"></span>
-            <span>风险概览</span>
-          </button>
           <button class="nav-item active" data-page="users" type="button">
             <span class="nav-icon" data-icon="users"></span>
             <span>受控用户</span>
@@ -4240,7 +4236,7 @@ svg {
           <nav class="global-nav" aria-label="平台一级导航">
             <button type="button" data-global-nav="console">游戏控制台</button>
             <button class="active" type="button" data-global-nav="risk" aria-current="page">
-              风控管理<span data-icon="chevron-down"></span>
+              退款风控<span data-icon="chevron-down"></span>
             </button>
             <button type="button" data-global-nav="project">项目管理</button>
           </nav>
@@ -6493,7 +6489,7 @@ document.querySelectorAll("[data-global-nav]").forEach((button) => {
   button.addEventListener("click", () => {
     const target = button.dataset.globalNav;
     if (target === "risk") {
-      showToast("风控管理", "当前正在使用退款风控模块", "info");
+      showToast("退款风控", "当前正在使用退款风控模块", "info");
       return;
     }
     showToast(
