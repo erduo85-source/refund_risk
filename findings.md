@@ -261,6 +261,15 @@
 - in-app Browser 对本地 `file://` 页面刷新受 URL 策略限制，未重试或绕过；刷新后的视觉、日期弹层和筛选点击链路仍需本地人工复验。
 - 功能提交：`937b876`（`fix: refine audit log filters`）。
 
+## 2026-08-10 / 操作日志页头按钮批注结论
+
+- “导出日志”从操作日志页的 `pageHeading()` 操作参数中直接移除，不使用 CSS 隐藏，因此不会保留不可见焦点或无效点击入口。
+- 该改动只影响操作日志页头；其他页面已有的导出或下载入口不做全局修改。
+- 不涉及断点或容器适配：页头无操作区后由现有 `pageHeading` 结构自然只渲染标题与说明。
+- 内联脚本解析通过；按钮文案、`data-action="export"` 和导出图标在 `renderAudit()` 片段中均为 0；`git diff --check` 通过。
+- 当前 `file://` 页面仍受已知浏览器 URL 策略限制，本轮未重复尝试被禁止的自动刷新；需手动刷新确认页头留白。
+- 功能提交：`95cd9de`（`fix: remove audit export action`）。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
