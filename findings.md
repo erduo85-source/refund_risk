@@ -120,6 +120,7 @@
 - 内联脚本由 Node.js 解析通过；最终 `renderConfigV3()` 的 7 项新旧标记静态断言全部通过。
 - 桌面策略卡容器已从四列调整为两列；现有 ≤1080px 两列、≤700px 单列断点继续兼容。
 - in-app Browser 对当前 `file://` 页面的 DOM 读取被 URL 策略拒绝，未绕过限制；刷新后视觉和卡片点击回归仍待手动完成。
+- 本批次功能与首轮留痕提交为 `92137ce`（`fix: simplify refund policy page`），已推送至 `origin/master`。
 
 ## 问题记录
 
