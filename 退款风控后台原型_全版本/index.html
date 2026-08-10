@@ -3813,6 +3813,104 @@ svg {
   white-space: nowrap;
 }
 
+.trigger-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.trigger-section-index {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 8px;
+  background: #eaf3ff;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.trigger-section-heading {
+  min-width: 0;
+}
+
+.trigger-section .policy-drawer-section-body {
+  padding: 16px;
+}
+
+.trigger-relation-grid {
+  padding: 0 !important;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.policy-drawer .trigger-relation-option {
+  min-height: 88px;
+  margin: 0;
+  padding: 13px;
+}
+
+.policy-drawer .trigger-relation-option > span {
+  min-width: 0;
+  margin-top: 0;
+}
+
+.policy-drawer .trigger-relation-option > span > strong,
+.policy-drawer .trigger-relation-option > span > span {
+  white-space: normal;
+}
+
+.policy-drawer .trigger-relation-option > span > span {
+  margin-top: 6px;
+  line-height: 1.55;
+}
+
+.trigger-period-row {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.trigger-period-copy {
+  min-width: 0;
+}
+
+.trigger-period-copy strong,
+.trigger-period-copy span {
+  display: block;
+}
+
+.trigger-period-copy strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.trigger-period-copy span {
+  margin-top: 5px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+.trigger-period-hint {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid #f0f3f7;
+}
+
+.trigger-rules-section .policy-drawer-section-body {
+  padding: 0 16px;
+}
+
 #page-users .data-table {
   min-width: 920px;
 }
@@ -4556,6 +4654,15 @@ svg {
 
   .policy-drawer .policy-drawer-section {
     min-width: 620px;
+  }
+
+  .trigger-relation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trigger-period-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
@@ -7893,24 +8000,41 @@ function updateTriggerPolicySummary(settings) {
   policyV3NaturalDescriptions.trigger = `已启用 <strong>${enabledCount} 项</strong>封禁规则；${relationText}条件时触发封禁，累计指标统计账号近 ${settings.periodDays} 天的退款订单。`;
 }
 
+function triggerDrawerSection(step, title, description, content, className = "") {
+  return `<section class="policy-drawer-section trigger-section ${className}">
+    <div class="policy-drawer-section-head trigger-section-head">
+      <span class="trigger-section-index">${step}</span>
+      <div class="trigger-section-heading">
+        <h3>${title}</h3>
+        <p>${description}</p>
+      </div>
+    </div>
+    <div class="policy-drawer-section-body">${content}</div>
+  </section>`;
+}
+
 triggerDrawerContent = function triggerDrawerContentRefined() {
   const settings = policyV2State.triggerSettings;
-  const relation = `<div class="radio-stack">
-    <label class="radio-option ${settings.relation === "any" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-trigger-relation" value="any" ${settings.relation === "any" ? "checked" : ""}><span><strong>满足任一条件即封禁</strong><span>任一已启用规则达到阈值后，立即拦截账号登录</span></span></label>
-    <label class="radio-option ${settings.relation === "all" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-trigger-relation" value="all" ${settings.relation === "all" ? "checked" : ""}><span><strong>满足所有条件才封禁</strong><span>所有已启用规则均达到阈值后，才拦截账号登录</span></span></label>
+  const relation = `<div class="radio-stack trigger-relation-grid">
+    <label class="radio-option trigger-relation-option ${settings.relation === "any" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-trigger-relation" value="any" ${settings.relation === "any" ? "checked" : ""}><span><strong>满足任一条件即封禁</strong><span>任一已启用规则达到阈值后，立即拦截账号登录</span></span></label>
+    <label class="radio-option trigger-relation-option ${settings.relation === "all" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-trigger-relation" value="all" ${settings.relation === "all" ? "checked" : ""}><span><strong>满足所有条件才封禁</strong><span>所有已启用规则均达到阈值后，才拦截账号登录</span></span></label>
   </div>`;
-  const period = policyRuleRow(
-    "统计周期",
-    "统一用于累计退款金额与累计退款笔数",
-    `<select class="select policy-period-select policy-drawer-input" id="triggerPeriodDays" aria-label="账号退款统计周期">${policyPeriodOptions(settings.periodDays)}</select>`,
-  ) + `<p class="policy-field-hint" id="triggerPeriodHint">统计该账号近 ${settings.periodDays} 天的退款订单</p>`;
+  const period = `<div class="trigger-period-row">
+    <div class="trigger-period-copy">
+      <strong>账号退款统计周期</strong>
+      <span>累计退款金额和累计退款笔数按该周期统计</span>
+    </div>
+    <select class="select policy-period-select policy-drawer-input" id="triggerPeriodDays" aria-label="账号退款统计周期">${policyPeriodOptions(settings.periodDays)}</select>
+  </div>
+  <p class="policy-field-hint trigger-period-hint" id="triggerPeriodHint">统计该账号近 ${settings.periodDays} 天的退款订单</p>`;
   const rules = [
     policyRuleRow("单笔退款金额", "单笔退款达到此金额时触发规则", triggerThresholdControl("singleAmount", settings.thresholds.singleAmount, "元", "单笔退款金额规则")),
     policyRuleRow("累计退款金额", "统计周期内累计退款达到此金额", triggerThresholdControl("cumulativeAmount", settings.thresholds.cumulativeAmount, "元", "累计退款金额规则")),
     policyRuleRow("累计退款笔数", "统计周期内退款订单达到此笔数", triggerThresholdControl("cumulativeCount", settings.thresholds.cumulativeCount, "笔", "累计退款笔数规则", 1)),
   ].join("");
-  return drawerSection("规则判定", "配置触发条件关系与账号退款统计范围", relation + period)
-    + drawerSection("封禁触发规则", "仅对已启用规则进行判定", rules);
+  return triggerDrawerSection("01", "条件关系", "选择多条已启用规则之间的计算方式", relation, "trigger-relation-section")
+    + triggerDrawerSection("02", "统计范围", "设置累计退款指标的账号回看周期", period, "trigger-period-section")
+    + triggerDrawerSection("03", "封禁条件", "启用规则并配置对应阈值", rules, "trigger-rules-section");
 };
 
 policyV2State.recoverySettings = {
