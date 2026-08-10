@@ -3385,7 +3385,7 @@ svg {
 }
 
 .policy-card-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -6113,7 +6113,7 @@ if (v3DemoStateUser) {
 userPaymentRequirements.set("nebula:U-87924130", 2000);
 
 renderPolicySummaryCard = function renderPolicySummaryCardV3(key, card) {
-  const updateText = policyV2State.updated[key] || "12 分钟前更新";
+  const updateText = policyV2State.updated[key] || "更新时间 2026/07/07 12:00";
   return `<button class="policy-summary-card" style="--card-accent:${card.color};--card-bg:${card.bg}" type="button" data-policy-card="${key}" aria-label="配置${card.title}">
     <span class="policy-card-top">
       <span class="policy-card-icon">${icon(card.icon)}</span>
@@ -6131,8 +6131,7 @@ renderConfig = function renderConfigV3() {
     ${pageHeading(
       "configTitle",
       "退款策略",
-      `策略仅对 ${projects[state.project].name} 生效，不影响其他游戏项目`,
-      `<button class="button secondary" type="button" data-action="history">${icon("audit")}变更历史</button>`,
+      "精细管控账号退款行为，自动封禁与补款解封规则一键配置",
     )}
     <section class="policy-status-hero" aria-labelledby="policyStatusTitle">
       <div class="policy-status-top">
@@ -6146,17 +6145,19 @@ renderConfig = function renderConfigV3() {
         </div>
       </div>
       <div class="policy-status-facts">
-        <span>生效范围 <strong>${projects[state.project].name}</strong></span>
         <span>最近发布 <strong>今天 14:18</strong></span>
         <span>操作人 <strong>林晓</strong></span>
       </div>
     </section>
     <div class="policy-section-heading">
-      <div><h2>策略配置</h2><p>用一句话了解当前规则，点击卡片进入完整配置</p></div>
-      <span>共 4 组配置</span>
+      <div><h2>策略配置</h2></div>
+      <span>共 2 组配置</span>
     </div>
     <section class="policy-card-grid" aria-label="退款策略配置卡片">
-      ${Object.entries(policyV2Cards).map(([key, card]) => renderPolicySummaryCard(key, card)).join("")}
+      ${Object.entries(policyV2Cards)
+        .filter(([key]) => key === "trigger" || key === "recovery")
+        .map(([key, card]) => renderPolicySummaryCard(key, card))
+        .join("")}
     </section>
   `;
   bindPolicyV3Events();
