@@ -4212,6 +4212,30 @@ svg {
   max-width: none;
 }
 
+.order-detail-field > .copy-line {
+  align-items: flex-start;
+  white-space: normal;
+}
+
+.order-detail-field > .copy-line .copy-value {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-all;
+}
+
+.order-detail-status {
+  font-weight: 500;
+}
+
+.order-detail-status.failed {
+  color: #cf1322;
+}
+
+.order-detail-status.refund-pending {
+  color: #389e0d;
+}
+
 @media (max-width: 900px) {
   .order-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5468,6 +5492,32 @@ const userProfileDetails = {
   "U-43018726": { uids: ["u129312301320282"], refundStores: ["google"], lastLoginIp: "175.136.62.19 马来西亚吉隆坡" },
   "U-30561974": { uids: ["u129312301320293"], refundStores: ["apple"], lastLoginIp: "118.163.47.12 中国台北" },
   "U-67182495": { uids: ["u129312301320304"], refundStores: ["google"], lastLoginIp: "49.228.116.33 泰国曼谷" },
+};
+
+const orderDetailRecords = {
+  "U-50192847": {
+    accountName: "暂无该信息",
+    sdkId: "10001_101003271785827092852564444",
+    channelType: "官方",
+    roleName: "Vison(vvvison111)",
+    server: "server01(10000001)",
+    affiliateChannel: "版署审核专用-游卡-安卓",
+    channelOrderId: "vFiEBfSIjLfwyRED",
+    sdkOrderId: "739861502875082752",
+    gameOrderId: "暂无该信息",
+    orderCreatedAt: "2026-08-04 15:05:29",
+    paymentCompletedAt: "2026-08-04 15:05:30",
+    paymentNotifiedAt: "2026-08-04 15:05:33",
+    paymentIp: "115.238.30.29(中国-浙江-杭州)",
+    firstPaymentIp: "115.238.30.29(中国-浙江-杭州)",
+    paymentDevice: "-",
+    orderStatus: "发货失败",
+    refundStatus: "未退款",
+    productName: "this is productName(com.fpx.test1)",
+    productAmount: "CNY 6",
+    actualPaymentAmount: "CNY 6",
+    refundTime: "2026-07-29 13:48",
+  },
 };
 
 const auditLogs = [
@@ -7022,11 +7072,41 @@ function openDrawer(userId) {
   drawer.querySelector("[data-close-drawer]").focus();
 }
 
+function getOrderDetailRecord(user) {
+  const profile = getUserProfileDetails(user);
+  const paymentTime = user.updated.length === 16 ? `${user.updated}:00` : user.updated;
+  const [ipAddress, ...locationParts] = profile.lastLoginIp.split(" ");
+  const paymentIp = locationParts.length ? `${ipAddress}(${locationParts.join("")})` : ipAddress;
+  return orderDetailRecords[user.id] || {
+    accountName: user.account || "暂无该信息",
+    sdkId: user.sdkId,
+    channelType: "官方",
+    roleName: user.name,
+    server: "server01(10000001)",
+    affiliateChannel: user.store === "google" ? "版署审核专用-游卡-安卓" : "App Store · 国服",
+    channelOrderId: user.order,
+    sdkOrderId: String(user.sdkId).replace(/\D/g, ""),
+    gameOrderId: "暂无该信息",
+    orderCreatedAt: paymentTime,
+    paymentCompletedAt: paymentTime,
+    paymentNotifiedAt: paymentTime,
+    paymentIp,
+    firstPaymentIp: paymentIp,
+    paymentDevice: user.device || "-",
+    orderStatus: "支付成功",
+    refundStatus: "已退款",
+    productName: "退款订单关联商品",
+    productAmount: `CNY ${Number(user.refund).toLocaleString("zh-CN")}`,
+    actualPaymentAmount: `CNY ${Number(user.refund).toLocaleString("zh-CN")}`,
+    refundTime: user.updated,
+  };
+}
+
 function openOrderDrawer(userId) {
   const user = state.users.find((item) => item.id === userId);
   if (!user) return;
   state.activeDrawerUser = userId;
-  const result = getRefundRiskResult(user);
+  const detail = getOrderDetailRecord(user);
   document.getElementById("drawerContent").innerHTML = `
     <div class="drawer-header">
       <h2 id="drawerTitle">订单详情</h2>
@@ -7036,25 +7116,32 @@ function openOrderDrawer(userId) {
       <section class="order-detail-section" aria-labelledby="orderAccountTitle">
         <h3 class="order-detail-section-title" id="orderAccountTitle">${icon("users")}账号信息</h3>
         <div class="order-detail-grid">
-          <div class="order-detail-field"><span>账号名：</span><div class="copy-line"><span class="copy-value">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div></div>
-          <div class="order-detail-field"><span>SDKID：</span><div class="copy-line"><span class="copy-value">${user.sdkId}</span>${refundCopyButton(user.sdkId, "SDKID")}</div></div>
-          <div class="order-detail-field"><span>UID：</span><div class="copy-line"><span class="copy-value">${user.id}</span>${refundCopyButton(user.id, "UID")}</div></div>
-          <div class="order-detail-field"><span>角色名：</span><strong>${user.name}</strong></div>
-          <div class="order-detail-field"><span>退款渠道：</span><div>${storeBadge(user.store)}</div></div>
-          <div class="order-detail-field"><span>账号状态：</span><div>${statusTag(user.status)}</div></div>
+          <div class="order-detail-field"><span>账号名：</span><strong>${detail.accountName}</strong></div>
+          <div class="order-detail-field"><span>SDK-ID：</span><div class="copy-line"><span class="copy-value">${detail.sdkId}</span>${refundCopyButton(detail.sdkId, "SDK-ID")}</div></div>
+          <div class="order-detail-field"><span>渠道类型：</span><strong>${detail.channelType}</strong></div>
+          <div class="order-detail-field"><span>角色名：</span><strong>${detail.roleName}</strong></div>
+          <div class="order-detail-field"><span>区服：</span><strong>${detail.server}</strong></div>
+          <div class="order-detail-field"><span>所属渠道：</span><strong>${detail.affiliateChannel}</strong></div>
         </div>
       </section>
-      <section class="order-detail-section" aria-labelledby="orderRefundTitle">
-        <h3 class="order-detail-section-title" id="orderRefundTitle">${icon("receipt")}退款信息</h3>
+      <section class="order-detail-section" aria-labelledby="orderPaymentTitle">
+        <h3 class="order-detail-section-title" id="orderPaymentTitle">${icon("payment")}支付信息</h3>
         <div class="order-detail-grid">
-          <div class="order-detail-field wide"><span>退款订单号：</span><div class="copy-line"><span class="copy-value money">${user.order}</span>${refundCopyButton(user.order, "退款订单号")}</div></div>
-          <div class="order-detail-field"><span>退款金额：</span><strong style="color:#cf1322">${formatMoney(user.refund)}</strong></div>
-          <div class="order-detail-field"><span>退款渠道：</span><div>${storeBadge(user.store)}</div></div>
-          <div class="order-detail-field"><span>退款时间：</span><strong>${user.updated}</strong></div>
-          <div class="order-detail-field"><span>累计退款：</span><strong>${user.count} 单，共 ${formatMoney(user.refund)}</strong></div>
-          <div class="order-detail-field"><span>风控结果：</span><strong class="${result.className}" style="color:${result.className === "blocked" ? "#cf1322" : "#1677ff"}">${result.label}</strong></div>
-          <div class="order-detail-field wide"><span>风控详情：</span><div class="refund-result-stack"><strong class="${result.className}">${result.label}</strong><span>${result.detail}</span></div></div>
-          <div class="order-detail-field full"><span>触发规则：</span><strong>${user.trigger}</strong></div>
+          <div class="order-detail-field"><span>渠道订单号：</span><div class="copy-line"><span class="copy-value">${detail.channelOrderId}</span>${refundCopyButton(detail.channelOrderId, "渠道订单号")}</div></div>
+          <div class="order-detail-field"><span>SDK订单号：</span><div class="copy-line"><span class="copy-value">${detail.sdkOrderId}</span>${refundCopyButton(detail.sdkOrderId, "SDK订单号")}</div></div>
+          <div class="order-detail-field"><span>游戏订单号：</span><strong>${detail.gameOrderId}</strong></div>
+          <div class="order-detail-field"><span>创建订单时间：</span><strong>${detail.orderCreatedAt}</strong></div>
+          <div class="order-detail-field"><span>支付完成时间：</span><strong>${detail.paymentCompletedAt}</strong></div>
+          <div class="order-detail-field"><span>支付通知时间：</span><strong>${detail.paymentNotifiedAt}</strong></div>
+          <div class="order-detail-field"><span>支付IP：</span><strong>${detail.paymentIp}</strong></div>
+          <div class="order-detail-field"><span>首次支付IP：</span><strong>${detail.firstPaymentIp}</strong></div>
+          <div class="order-detail-field"><span>支付设备：</span><strong>${detail.paymentDevice}</strong></div>
+          <div class="order-detail-field"><span>订单状态：</span><strong class="order-detail-status ${detail.orderStatus === "发货失败" ? "failed" : ""}">${detail.orderStatus}</strong></div>
+          <div class="order-detail-field"><span>退款状态：</span><strong class="order-detail-status ${detail.refundStatus === "未退款" ? "refund-pending" : ""}">${detail.refundStatus}</strong></div>
+          <div class="order-detail-field"><span>商品名：</span><strong>${detail.productName}</strong></div>
+          <div class="order-detail-field"><span>商品金额：</span><strong>${detail.productAmount}</strong></div>
+          <div class="order-detail-field"><span>实际支付金额：</span><strong>${detail.actualPaymentAmount}</strong></div>
+          <div class="order-detail-field"><span>退款时间：</span><strong>${detail.refundTime}</strong></div>
         </div>
       </section>
     </div>
