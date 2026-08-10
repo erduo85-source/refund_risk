@@ -3850,6 +3850,54 @@ svg {
   grid-template-columns: minmax(180px, 0.7fr) minmax(180px, 0.7fr) minmax(420px, 1.6fr) auto;
 }
 
+.audit-table {
+  min-width: 1120px;
+  table-layout: fixed;
+}
+
+.audit-table th:first-child,
+.audit-table td:first-child {
+  width: 190px;
+  padding-left: 18px;
+  padding-right: 14px;
+}
+
+.audit-table th:nth-child(2) {
+  width: 100px;
+}
+
+.audit-table th:nth-child(3) {
+  width: 120px;
+}
+
+.audit-table th:nth-child(4) {
+  width: 130px;
+}
+
+.audit-table th:nth-child(5),
+.audit-table th:nth-child(6) {
+  width: 250px;
+}
+
+.audit-module {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f0f5ff;
+  color: #245b99;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.audit-before {
+  color: var(--text-tertiary);
+}
+
+.audit-result {
+  color: var(--text);
+  font-weight: 550;
+}
+
 #page-refunds .data-table {
   min-width: 1120px;
 }
@@ -5312,13 +5360,13 @@ const userProfileDetails = {
 };
 
 const auditLogs = [
-  { time: "2026-07-29 14:32:08", operator: "系统", type: "账号封禁", target: "Starlord_77 / U-87924130", detail: "命中累计退款金额规则", result: "成功", resultClass: "success" },
-  { time: "2026-07-29 14:18:23", operator: "林晓", type: "策略修改", target: "封禁触发规则", detail: "累计退款笔数 3 → 2", result: "成功", resultClass: "success" },
-  { time: "2026-07-29 13:48:51", operator: "系统", type: "补款金额修改", target: "飞行的橘子 / U-50192847", detail: "解封补款金额调整为 ¥200.00", result: "成功", resultClass: "success" },
-  { time: "2026-07-29 12:16:04", operator: "系统", type: "账号解封", target: "Ares_Lee / U-79241650", detail: "补款已达到解封阈值", result: "成功", resultClass: "success" },
-  { time: "2026-07-29 11:06:19", operator: "周岚", type: "账号封禁", target: "MoonRabbit / U-29410586", detail: "高频退款并消耗虚拟资产", result: "成功", resultClass: "success" },
-  { time: "2026-07-29 10:01:42", operator: "系统", type: "策略修改", target: "补款解封规则", detail: "解封方式调整为补款完成后自动解封", result: "成功", resultClass: "success" },
-  { time: "2026-07-29 09:54:11", operator: "周岚", type: "账号解封", target: "Kay_Dragon / U-43018726", detail: "人工核验补款 ¥648.00 后解封", result: "成功", resultClass: "success" },
+  { time: "2026-07-29 14:32:08", operator: "系统", module: "受控用户", type: "账号封禁", before: "账号状态：观察中", result: "账号状态：封禁中" },
+  { time: "2026-07-29 14:18:23", operator: "林晓", module: "退款策略", type: "策略修改", before: "累计退款笔数：3", result: "累计退款笔数：2" },
+  { time: "2026-07-29 13:48:51", operator: "系统", module: "受控用户", type: "补款金额修改", before: "补款金额：¥0.00", result: "补款金额：¥200.00" },
+  { time: "2026-07-29 12:16:04", operator: "系统", module: "受控用户", type: "账号解封", before: "账号状态：封禁中", result: "账号状态：已解封" },
+  { time: "2026-07-29 11:06:19", operator: "周岚", module: "受控用户", type: "账号封禁", before: "账号状态：观察中", result: "账号状态：封禁中" },
+  { time: "2026-07-29 10:01:42", operator: "系统", module: "退款策略", type: "策略修改", before: "解封规则：人工审核", result: "解封规则：补款后自动解封" },
+  { time: "2026-07-29 09:54:11", operator: "周岚", module: "受控用户", type: "账号解封", before: "账号状态：封禁中", result: "账号状态：已解封" },
 ];
 
 const state = {
@@ -6306,10 +6354,10 @@ function renderAuditRows(logs) {
   return logs.map((log) => `<tr>
     <td><span class="money">${log.time}</span></td>
     <td>${log.operator}</td>
+    <td><span class="audit-module">${log.module}</span></td>
     <td>${log.type}</td>
-    <td>${log.target}</td>
-    <td>${log.detail}</td>
-    <td><span class="status-tag ${log.resultClass}">${log.result}</span></td>
+    <td><span class="audit-before">${log.before}</span></td>
+    <td><span class="audit-result">${log.result}</span></td>
   </tr>`).join("");
 }
 
@@ -6366,8 +6414,8 @@ function renderAudit() {
     <section class="card">
       <div class="table-toolbar"><strong>日志明细</strong><span class="muted">共 ${logs.length} 条 · 保留最近 180 天</span></div>
       <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>操作时间</th><th>操作人</th><th>操作类型</th><th>操作对象</th><th>详情</th><th>结果</th></tr></thead>
+        <table class="data-table audit-table">
+          <thead><tr><th>操作时间</th><th>操作人</th><th>功能模块</th><th>操作类型</th><th>操作前</th><th>操作结果</th></tr></thead>
           <tbody>${renderAuditRows(logs)}</tbody>
         </table>
       </div>
