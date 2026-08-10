@@ -1796,6 +1796,29 @@ svg {
   transform: translateX(0);
 }
 
+.detail-drawer.user-detail-mode {
+  overflow: hidden;
+}
+
+.detail-drawer.user-detail-mode #drawerContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-drawer.user-detail-mode .drawer-header {
+  position: relative;
+  top: auto;
+  flex: 0 0 66px;
+}
+
+.drawer-scroll-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .drawer-scrim,
 .mobile-scrim {
   position: fixed;
@@ -1871,6 +1894,44 @@ svg {
   margin-left: auto;
 }
 
+.drawer-user-banner {
+  min-height: 68px;
+  padding: 12px 14px;
+  border: 1px solid #badeff;
+  border-radius: 8px;
+  background: #eaf3ff;
+  color: #245b99;
+}
+
+.drawer-user-identifiers {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.drawer-user-identifiers .copy-line {
+  min-width: 0;
+}
+
+.drawer-user-identifiers .copy-value {
+  max-width: 320px;
+}
+
+.drawer-user-banner .inline-copy-button {
+  color: #4e77a4;
+}
+
+.drawer-user-account {
+  color: #124a87;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.drawer-user-uid {
+  color: #4e77a4;
+  font-size: 12px;
+}
+
 .drawer-actions {
   margin-top: 18px;
   display: flex;
@@ -1918,6 +1979,10 @@ svg {
   gap: 24px;
 }
 
+.user-detail-mode .drawer-tabs {
+  top: 0;
+}
+
 .drawer-tab {
   position: relative;
   min-height: 48px;
@@ -1952,6 +2017,18 @@ svg {
   display: block;
 }
 
+.drawer-footer {
+  flex: 0 0 auto;
+  min-height: 64px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -8px 18px rgba(16, 24, 40, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 .detail-list {
   margin: 0;
 }
@@ -1983,31 +2060,31 @@ svg {
 
 .timeline li {
   position: relative;
-  min-height: 80px;
-  padding: 0 0 22px 28px;
+  min-height: 72px;
+  padding: 0 0 24px 28px;
 }
 
 .timeline li::before {
   content: "";
   position: absolute;
-  top: 5px;
-  left: 5px;
-  width: 8px;
-  height: 8px;
-  background: var(--timeline-color, var(--primary));
-  border: 3px solid var(--timeline-bg, var(--primary-bg));
+  top: 6px;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--timeline-fill, #fff);
+  border: 2px solid var(--timeline-color, var(--primary));
   border-radius: 50%;
-  box-sizing: content-box;
+  box-sizing: border-box;
 }
 
 .timeline li::after {
   content: "";
   position: absolute;
   top: 20px;
-  bottom: 0;
-  left: 11px;
+  bottom: -2px;
+  left: 4px;
   width: 1px;
-  background: var(--border);
+  background: #e8e8e8;
 }
 
 .timeline li:last-child::after {
@@ -2015,18 +2092,91 @@ svg {
 }
 
 .timeline strong {
+  line-height: 22px;
+  font-size: 14px;
   font-weight: 550;
 }
 
 .timeline p {
-  margin: 3px 0;
-  color: var(--text-secondary);
+  margin: 3px 0 0;
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
 .timeline time {
+  display: block;
+  margin-top: 2px;
   color: var(--text-tertiary);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.timeline-amount {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.timeline-amount.positive {
+  color: #52c41a;
+}
+
+.timeline-amount.negative {
+  color: #ff4d4f;
+}
+
+.drawer-order-alert {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid #badeff;
+  border-radius: 6px;
+  background: #eaf3ff;
+  color: #245b99;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.drawer-order-table-shell {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.drawer-order-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.drawer-order-table th,
+.drawer-order-table td {
+  height: 52px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.drawer-order-table th {
+  height: 46px;
+  background: #fafafa;
+  color: var(--text);
+  font-weight: 550;
+}
+
+.drawer-order-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.drawer-order-table .order-number-cell {
+  width: 190px;
+}
+
+.drawer-order-table .copy-value {
+  max-width: 145px;
 }
 
 .modal-layer {
@@ -2414,13 +2564,21 @@ svg {
     grid-template-columns: 1fr 1fr;
   }
 
-  .drawer-user {
+  .drawer-user:not(.drawer-user-banner) {
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
-  .drawer-user .status-tag {
+  .drawer-user:not(.drawer-user-banner) .status-tag {
     margin-left: 57px;
+  }
+
+  .drawer-user-banner {
+    align-items: flex-start;
+  }
+
+  .drawer-user-identifiers .copy-value {
+    max-width: 210px;
   }
 
   .detail-list > div {
@@ -5489,6 +5647,78 @@ function switchPage(page) {
   closeMobileNav();
 }
 
+function shiftDrawerDateTime(value, offsetDays = 0) {
+  const normalized = String(value || "").trim().replace(" ", "T");
+  const date = new Date(normalized.length === 16 ? `${normalized}:00` : normalized);
+  if (Number.isNaN(date.getTime())) return value;
+  date.setDate(date.getDate() + offsetDays);
+  const pad = (number) => String(number).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function buildDrawerRefundOrders(user) {
+  const count = Math.max(1, Number(user.count) || 1);
+  const totalCents = Math.round(Number(user.refund) * 100);
+  const baseCents = Math.floor(totalCents / count);
+  const remainder = totalCents - baseCents * count;
+  return Array.from({ length: count }, (_, index) => ({
+    id: index === 0 ? user.order : `${user.order}-${String(index + 1).padStart(2, "0")}`,
+    amount: (baseCents + (index < remainder ? 1 : 0)) / 100,
+    channel: user.store === "apple" ? "App Store" : "Google Play",
+    orderTime: shiftDrawerDateTime(user.firstRefund, -index),
+    refundTime: shiftDrawerDateTime(user.updated, -index),
+  }));
+}
+
+function renderDrawerRiskTimeline(user) {
+  const currentEvent = user.status === "blocked"
+    ? { title: "系统自动封禁", detail: user.trigger, color: "#ff4d4f", fill: "#ff4d4f" }
+    : user.status === "recovered"
+      ? { title: "系统自动解封", detail: "补款条件已满足，账号恢复登录", color: "#52c41a", fill: "#52c41a" }
+      : { title: "账号进入观察", detail: user.trigger, color: "#1677ff", fill: "#1677ff" };
+  const events = [{ ...currentEvent, time: user.updated }];
+  if (user.supplement > 0) {
+    events.push({
+      title: "玩家自助补款",
+      detail: "补款结果已通过支付渠道校验",
+      time: user.updated,
+      amount: `+${formatMoney(user.supplement)}`,
+      amountClass: "positive",
+      color: "#1677ff",
+      fill: "#fff",
+    });
+  }
+  events.push(
+    {
+      title: user.store === "apple" ? "苹果订单退款" : "Google Play 订单退款",
+      detail: "退款通知已校验并关联至当前账号",
+      time: user.firstRefund,
+      amount: `-${formatMoney(user.refund)}`,
+      amountClass: "negative",
+      color: "#fa8c16",
+      fill: "#fff",
+    },
+    {
+      title: "游戏资产核查完成",
+      detail: "退款关联商品存在已消耗记录",
+      time: user.firstRefund,
+      color: "#1677ff",
+      fill: "#fff",
+    },
+  );
+  return events.map((event) => `<li style="--timeline-color:${event.color};--timeline-fill:${event.fill}"><strong>${event.title}</strong><time>${event.time}</time><p>${event.detail}</p>${event.amount ? `<span class="timeline-amount ${event.amountClass}">${event.amount}</span>` : ""}</li>`).join("");
+}
+
+function renderDrawerOrderRows(user) {
+  return buildDrawerRefundOrders(user).map((order) => `<tr>
+    <td class="order-number-cell"><div class="copy-line"><span class="copy-value money">${order.id}</span>${refundCopyButton(order.id, "退款订单号")}</div></td>
+    <td><strong style="color:#cf1322">${formatMoney(order.amount)}</strong></td>
+    <td>${order.channel}</td>
+    <td>${order.orderTime}</td>
+    <td>${order.refundTime}</td>
+  </tr>`).join("");
+}
+
 function openDrawer(userId) {
   const user = state.users.find((item) => item.id === userId);
   if (!user) return;
@@ -5499,62 +5729,60 @@ function openDrawer(userId) {
       <h2 id="drawerTitle">用户风控详情</h2>
       <button class="icon-button" type="button" data-close-drawer aria-label="关闭详情">${icon("close")}</button>
     </div>
-    <div class="drawer-summary">
-      <div class="drawer-user">
-        <span class="user-avatar">${user.avatar}</span>
-        <div><h3>${user.name}</h3><p>${user.id} · ${user.country}</p></div>
-        ${statusTag(user.status)}
+    <div class="drawer-scroll-body">
+      <div class="drawer-summary">
+        <div class="drawer-user drawer-user-banner">
+          <div class="drawer-user-identifiers">
+            <div class="copy-line"><span class="copy-value drawer-user-account">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div>
+            <div class="copy-line"><span class="copy-value drawer-user-uid">UID：${user.id}</span>${refundCopyButton(user.id, "UID")}</div>
+          </div>
+          ${statusTag(user.status)}
+        </div>
+        <div class="drawer-facts">
+          <div class="fact"><span>累计退款</span><strong style="color:#cf1322">${formatMoney(user.refund)}</strong></div>
+          <div class="fact"><span>累计补款</span><strong>${formatMoney(user.supplement)}</strong></div>
+          <div class="fact"><span>仍需补款</span><strong style="color:${need > 0 ? "#d46b08" : "#389e0d"}">${formatMoney(need)}</strong></div>
+        </div>
       </div>
-      <div class="drawer-actions">
-        ${
-          user.status === "blocked"
-            ? `<button class="button" type="button" data-user-action="unblock" data-user-id="${user.id}">${icon("unlock")}解除封禁</button>`
-            : `<button class="button danger" type="button" data-user-action="block" data-user-id="${user.id}">${icon("lock")}立即封禁</button>`
-        }
-        <button class="button secondary" type="button" data-action="copy-user">复制 UID</button>
+      <div class="drawer-tabs" role="tablist" aria-label="用户风控详情分类">
+        <button class="drawer-tab active" id="drawer-tab-profile" type="button" role="tab" aria-selected="true" aria-controls="drawer-profile" data-drawer-tab="profile">账号信息</button>
+        <button class="drawer-tab" id="drawer-tab-timeline" type="button" role="tab" aria-selected="false" aria-controls="drawer-timeline" data-drawer-tab="timeline">风险轨迹</button>
+        <button class="drawer-tab" id="drawer-tab-orders" type="button" role="tab" aria-selected="false" aria-controls="drawer-orders" data-drawer-tab="orders">订单信息</button>
       </div>
-      <div class="drawer-facts">
-        <div class="fact"><span>累计退款</span><strong style="color:#cf1322">${formatMoney(user.refund)}</strong></div>
-        <div class="fact"><span>已补款</span><strong>${formatMoney(user.supplement)}</strong></div>
-        <div class="fact"><span>仍需补款</span><strong style="color:${need > 0 ? "#d46b08" : "#389e0d"}">${formatMoney(need)}</strong></div>
+      <div class="drawer-panel active" id="drawer-profile" role="tabpanel" aria-labelledby="drawer-tab-profile">
+        <dl class="detail-list">
+          <div><dt>账号名</dt><dd><div class="copy-line"><span class="copy-value">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div></dd></div>
+          <div><dt>UID</dt><dd><div class="copy-line"><span class="copy-value">${user.id}</span>${refundCopyButton(user.id, "UID")}</div></dd></div>
+          <div><dt>SDKID</dt><dd><div class="copy-line"><span class="copy-value">${user.sdkId}</span>${refundCopyButton(user.sdkId, "SDKID")}</div></dd></div>
+          <div><dt>退款渠道</dt><dd>${storeBadge(user.store)}</dd></div>
+          <div><dt>触发规则</dt><dd>${user.trigger}</dd></div>
+          <div><dt>首次退款</dt><dd>${user.firstRefund}</dd></div>
+          <div><dt>最近登录</dt><dd>${user.lastLogin}</dd></div>
+          <div><dt>最近设备</dt><dd>${user.device}</dd></div>
+        </dl>
+      </div>
+      <div class="drawer-panel" id="drawer-timeline" role="tabpanel" aria-labelledby="drawer-tab-timeline">
+        <ol class="timeline">${renderDrawerRiskTimeline(user)}</ol>
+      </div>
+      <div class="drawer-panel" id="drawer-orders" role="tabpanel" aria-labelledby="drawer-tab-orders">
+        <div class="drawer-order-alert">账号累计退款 ${user.count} 单，共 ${formatMoney(user.refund)}，当前累计补款 ${formatMoney(user.supplement)}</div>
+        <div class="drawer-order-table-shell">
+          <table class="drawer-order-table">
+            <thead><tr><th class="order-number-cell">退款订单号</th><th>订单金额</th><th>退款渠道</th><th>下单时间</th><th>退款时间</th></tr></thead>
+            <tbody>${renderDrawerOrderRows(user)}</tbody>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="drawer-tabs" role="tablist">
-      <button class="drawer-tab active" type="button" role="tab" aria-selected="true" data-drawer-tab="profile">基本信息</button>
-      <button class="drawer-tab" type="button" role="tab" aria-selected="false" data-drawer-tab="timeline">风险轨迹</button>
-      <button class="drawer-tab" type="button" role="tab" aria-selected="false" data-drawer-tab="orders">退款订单</button>
-    </div>
-    <div class="drawer-panel active" id="drawer-profile">
-      <dl class="detail-list">
-        <div><dt>退款渠道</dt><dd>${storeBadge(user.store)}</dd></div>
-        <div><dt>商店账号</dt><dd>${user.account}</dd></div>
-        <div><dt>最近订单号</dt><dd class="money">${user.order}</dd></div>
-        <div><dt>触发规则</dt><dd>${user.trigger}</dd></div>
-        <div><dt>风险评分</dt><dd><strong style="color:${user.score >= 80 ? "#cf1322" : "#d46b08"}">${user.score} / 100</strong></dd></div>
-        <div><dt>首次退款</dt><dd>${user.firstRefund}</dd></div>
-        <div><dt>最近登录</dt><dd>${user.lastLogin}</dd></div>
-        <div><dt>最近设备</dt><dd>${user.device}</dd></div>
-      </dl>
-    </div>
-    <div class="drawer-panel" id="drawer-timeline">
-      <ol class="timeline">
-        <li style="--timeline-color:#ff4d4f;--timeline-bg:#fff2f0"><strong>${user.status === "blocked" ? "登录已拦截" : "命中退款风控"}</strong><p>${user.trigger}</p><time>${user.updated}</time></li>
-        <li style="--timeline-color:#faad14;--timeline-bg:#fffbe6"><strong>检测到商店退款</strong><p>${user.store === "apple" ? "App Store Server Notification" : "Google Play Voided Purchase"} 校验成功</p><time>${user.firstRefund}</time></li>
-        <li><strong>游戏资产核查完成</strong><p>退款关联商品存在已消耗记录</p><time>${user.firstRefund}</time></li>
-      </ol>
-    </div>
-    <div class="drawer-panel" id="drawer-orders">
-      <dl class="detail-list">
-        <div><dt>订单号</dt><dd class="money">${user.order}</dd></div>
-        <div><dt>退款金额</dt><dd><strong style="color:#cf1322">${formatMoney(user.refund)}</strong></dd></div>
-        <div><dt>退款笔数</dt><dd>${user.count} 笔</dd></div>
-        <div><dt>商店校验</dt><dd><span class="status-tag success">校验成功</span></dd></div>
-      </dl>
+    <div class="drawer-footer">
+      ${user.status === "blocked"
+        ? `<button class="button" type="button" data-user-action="unblock" data-user-id="${user.id}">${icon("unlock")}解除封禁</button>`
+        : `<button class="button danger" type="button" data-user-action="block" data-user-id="${user.id}">${icon("lock")}立即封禁</button>`}
     </div>
   `;
 
   const drawer = document.getElementById("detailDrawer");
-  drawer.classList.add("open");
+  drawer.classList.add("open", "user-detail-mode");
   drawer.setAttribute("aria-hidden", "false");
   document.getElementById("drawerScrim").classList.add("visible");
   document.body.style.overflow = "hidden";
@@ -5596,6 +5824,7 @@ function openOrderDrawer(userId) {
     </div>
   `;
   const drawer = document.getElementById("detailDrawer");
+  drawer.classList.remove("user-detail-mode");
   drawer.classList.add("open");
   drawer.setAttribute("aria-hidden", "false");
   document.getElementById("drawerScrim").classList.add("visible");
@@ -5605,7 +5834,7 @@ function openOrderDrawer(userId) {
 
 function closeDrawer() {
   const drawer = document.getElementById("detailDrawer");
-  drawer.classList.remove("open");
+  drawer.classList.remove("open", "user-detail-mode");
   drawer.setAttribute("aria-hidden", "true");
   document.getElementById("drawerScrim").classList.remove("visible");
   document.body.style.overflow = "";
