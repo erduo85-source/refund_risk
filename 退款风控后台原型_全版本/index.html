@@ -860,6 +860,10 @@ svg {
   align-items: end;
 }
 
+#page-users .filter-row {
+  grid-template-columns: minmax(280px, 1.6fr) minmax(180px, 0.8fr) auto;
+}
+
 .filter-group label,
 .form-field > label,
 .form-label {
@@ -1030,16 +1034,6 @@ svg {
   flex: 1;
 }
 
-.selection-tools {
-  display: none;
-  align-items: center;
-  gap: 4px;
-}
-
-.selection-tools.visible {
-  display: flex;
-}
-
 .table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -1083,19 +1077,8 @@ svg {
   background: #f5faff;
 }
 
-.data-table tbody tr.selected-row {
-  background: #e6f4ff;
-}
-
 .data-table tbody tr:last-child td {
   border-bottom: 0;
-}
-
-.checkbox {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--primary);
 }
 
 .user-cell {
@@ -1239,25 +1222,6 @@ svg {
   border-color: #91caff;
   color: #0958d9;
   background: var(--primary-bg);
-}
-
-.risk-score {
-  width: 76px;
-}
-
-.risk-score-line {
-  height: 4px;
-  margin-top: 5px;
-  background: #f0f0f0;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.risk-score-line span {
-  display: block;
-  height: 100%;
-  background: var(--danger);
-  border-radius: inherit;
 }
 
 .row-actions {
@@ -2246,6 +2210,10 @@ svg {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  #page-users .filter-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .filter-actions {
     justify-content: flex-end;
   }
@@ -2378,6 +2346,10 @@ svg {
   }
 
   .filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  #page-users .filter-row {
     grid-template-columns: 1fr;
   }
 
@@ -3531,7 +3503,14 @@ svg {
 }
 
 #page-users .data-table {
-  min-width: 1190px;
+  min-width: 920px;
+}
+
+#page-users .data-table th:first-child,
+#page-users .data-table td:first-child {
+  width: auto;
+  padding-left: 18px;
+  padding-right: 14px;
 }
 
 .recent-operator-cell {
@@ -4208,7 +4187,7 @@ const baseUsers = [
     refund: 328,
     count: 2,
     supplement: 128,
-    status: "pending",
+    status: "blocked",
     score: 78,
     trigger: "30 日内退款 2 笔",
     updated: "2026-07-29 13:48",
@@ -4341,7 +4320,6 @@ const state = {
   users: structuredClone(baseUsers),
   filteredUsers: structuredClone(baseUsers),
   storeFilter: "all",
-  selected: new Set(),
   activeDrawerUser: null,
   modalAction: null,
   modalTargets: [],
@@ -4349,8 +4327,7 @@ const state = {
 };
 
 const statusMap = {
-  blocked: { label: "已封禁", className: "blocked" },
-  pending: { label: "待补款", className: "pending" },
+  blocked: { label: "封禁中", className: "blocked" },
   recovered: { label: "已解封", className: "recovered" },
   observing: { label: "观察中", className: "observing" },
 };
@@ -4362,14 +4339,6 @@ const pageTitles = {
   config: "退款策略",
   audit: "操作日志",
 };
-
-const avatarPalette = [
-  ["#0958d9", "#e6f4ff"],
-  ["#531dab", "#f9f0ff"],
-  ["#08979c", "#e6fffb"],
-  ["#d46b08", "#fff7e6"],
-  ["#389e0d", "#f6ffed"],
-];
 
 function formatMoney(value, symbol = projects[state.project].currencySymbol) {
   return `${symbol}${Number(value).toLocaleString("zh-CN", { minimumFractionDigits: 2 })}`;
@@ -4501,7 +4470,7 @@ function renderOverview() {
 
 function renderUserRows(users) {
   if (!users.length) {
-    return `<tr><td colspan="9">
+    return `<tr><td colspan="7">
       <div class="empty-state">
         <div class="empty-state-icon">${icon("empty")}</div>
         <strong>没有找到匹配的用户</strong>
@@ -4511,14 +4480,10 @@ function renderUserRows(users) {
   }
 
   return users
-    .map((user, index) => {
-      const palette = avatarPalette[index % avatarPalette.length];
-      const checked = state.selected.has(user.id);
-      return `<tr class="${checked ? "selected-row" : ""}">
-        <td><input class="checkbox user-check" type="checkbox" aria-label="选择 ${user.name}" data-user-id="${user.id}" ${checked ? "checked" : ""}></td>
+    .map((user) => {
+      return `<tr>
         <td>
           <div class="user-cell">
-            <span class="user-avatar" style="--avatar-color:${palette[0]};--avatar-bg:${palette[1]}">${user.avatar}</span>
             <span class="user-meta"><strong title="${user.name}">${user.name}</strong><span>${user.id}</span></span>
           </div>
         </td>
@@ -4527,9 +4492,6 @@ function renderUserRows(users) {
         <td><span class="money">${formatMoney(user.supplement)}</span><span class="subtext">${user.supplement >= user.refund ? "已补足" : `仍需 ${formatMoney(user.refund - user.supplement)}`}</span></td>
         <td>${statusTag(user.status)}</td>
         <td><span>${user.trigger}</span><span class="subtext">${user.updated}</span></td>
-        <td>
-          <div class="risk-score"><strong>${user.score}</strong><span class="subtext">风险分</span><div class="risk-score-line"><span style="width:${user.score}%"></span></div></div>
-        </td>
         <td>
           <div class="row-actions">
             <button class="button link" type="button" data-view-user="${user.id}">详情</button>
@@ -4546,19 +4508,11 @@ function renderUserRows(users) {
 }
 
 function renderUsers() {
-  const project = projects[state.project];
-  const blocked = state.users.filter((user) => user.status === "blocked").length;
-  const pending = state.users.filter((user) => user.status === "pending").length;
-  const recovered = state.users.filter((user) => user.status === "recovered").length;
-  const selectedCount = state.selected.size;
-
   document.getElementById("page-users").innerHTML = `
     ${pageHeading(
       "usersTitle",
       "受控用户",
-      `管理因退款触发登录拦截的用户 · ${project.name}`,
-      `<button class="button secondary" type="button" data-action="export">${icon("export")}导出名单</button>
-       <button class="button" type="button" data-action="manual-block">${icon("plus")}手动封禁</button>`,
+      "管理退款用户，支持提前封禁和手动解封",
     )}
     <div class="scope-strip" aria-label="退款风控链路状态">
       <span class="scope-mode">已开启用户风控</span>
@@ -4576,12 +4530,6 @@ function renderUsers() {
         <strong>恢复游戏</strong>
       </div>
     </div>
-    <div class="metric-grid">
-      ${metricCard({ label: "登录拦截中", value: project.riskCount, sub: "其中 5 人已提交申诉", iconName: "lock", color: "#cf1322", bg: "#fff2f0" })}
-      ${metricCard({ label: "待补款", value: pending + 6, sub: "待补金额 " + formatMoney(2376), iconName: "wallet", color: "#d46b08", bg: "#fff7e6" })}
-      ${metricCard({ label: "今日已解封", value: recovered + 5, sub: "补款解封率 72.4%", iconName: "unlock", color: "#389e0d", bg: "#f6ffed" })}
-      ${metricCard({ label: "高风险用户", value: blocked + 9, sub: "风险分 ≥ 80", iconName: "alert", color: "#531dab", bg: "#f9f0ff" })}
-    </div>
     <section class="card filter-card" aria-label="筛选条件">
       <div class="filter-row">
         <div class="filter-group">
@@ -4595,19 +4543,9 @@ function renderUsers() {
           <label for="statusFilter">风控状态</label>
           <select class="select" id="statusFilter">
             <option value="all">全部状态</option>
-            <option value="blocked">已封禁</option>
-            <option value="pending">待补款</option>
             <option value="observing">观察中</option>
+            <option value="blocked">封禁中</option>
             <option value="recovered">已解封</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="riskFilter">风险等级</label>
-          <select class="select" id="riskFilter">
-            <option value="all">全部等级</option>
-            <option value="high">高风险（≥ 80）</option>
-            <option value="medium">中风险（50–79）</option>
-            <option value="low">低风险（< 50）</option>
           </select>
         </div>
         <div class="filter-actions">
@@ -4625,25 +4563,17 @@ function renderUsers() {
           <button class="${state.storeFilter === "apple" ? "active" : ""}" type="button" data-store="apple"><span class="mini-platform apple">A</span>App Store</button>
           <button class="${state.storeFilter === "google" ? "active" : ""}" type="button" data-store="google"><span class="mini-platform google"></span>Google Play</button>
         </div>
-        <span class="toolbar-spacer"></span>
-        <div class="selection-tools ${selectedCount ? "visible" : ""}" id="selectionTools">
-          <span>已选 <strong id="selectedCount">${selectedCount}</strong> 项</span>
-          <button class="button link danger-link" type="button" data-bulk-action="block">批量封禁</button>
-          <button class="button link" type="button" data-bulk-action="unblock">批量解封</button>
-        </div>
       </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th><input class="checkbox" id="selectAll" type="checkbox" aria-label="选择全部当前用户"></th>
               <th>用户</th>
               <th>退款渠道</th>
               <th>累计退款</th>
               <th>已补款</th>
               <th>状态</th>
               <th>触发原因 / 更新时间</th>
-              <th>风险</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -4985,10 +4915,8 @@ function bindUsersEvents() {
   document.getElementById("resetFilters")?.addEventListener("click", () => {
     document.getElementById("userSearch").value = "";
     document.getElementById("statusFilter").value = "all";
-    document.getElementById("riskFilter").value = "all";
     state.storeFilter = "all";
     state.filteredUsers = [...state.users];
-    state.selected.clear();
     renderUsers();
     showToast("筛选条件已重置", "已显示全部受控用户", "info");
   });
@@ -5000,27 +4928,11 @@ function bindUsersEvents() {
     });
   });
 
-  document.getElementById("selectAll")?.addEventListener("change", (event) => {
-    state.selected.clear();
-    if (event.target.checked) {
-      state.filteredUsers.forEach((user) => state.selected.add(user.id));
-    }
-    refreshUserTable();
-  });
-
-  document.querySelectorAll(".user-check").forEach((checkbox) => {
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) state.selected.add(checkbox.dataset.userId);
-      else state.selected.delete(checkbox.dataset.userId);
-      refreshUserTable();
-    });
-  });
 }
 
 function applyUserFilters() {
   const query = (document.getElementById("userSearch")?.value || "").trim().toLowerCase();
   const status = document.getElementById("statusFilter")?.value || "all";
-  const risk = document.getElementById("riskFilter")?.value || "all";
   state.filteredUsers = state.users.filter((user) => {
     const queryHit =
       !query ||
@@ -5029,14 +4941,8 @@ function applyUserFilters() {
       );
     const storeHit = state.storeFilter === "all" || user.store === state.storeFilter;
     const statusHit = status === "all" || user.status === status;
-    const riskHit =
-      risk === "all" ||
-      (risk === "high" && user.score >= 80) ||
-      (risk === "medium" && user.score >= 50 && user.score < 80) ||
-      (risk === "low" && user.score < 50);
-    return queryHit && storeHit && statusHit && riskHit;
+    return queryHit && storeHit && statusHit;
   });
-  state.selected.clear();
   renderUsers();
 }
 
@@ -5044,21 +4950,6 @@ function refreshUserTable() {
   const body = document.getElementById("userTableBody");
   if (!body) return;
   body.innerHTML = renderUserRows(state.filteredUsers);
-  document.getElementById("selectedCount").textContent = state.selected.size;
-  document.getElementById("selectionTools").classList.toggle("visible", state.selected.size > 0);
-  const selectAll = document.getElementById("selectAll");
-  if (selectAll) {
-    selectAll.checked = state.filteredUsers.length > 0 && state.selected.size === state.filteredUsers.length;
-    selectAll.indeterminate =
-      state.selected.size > 0 && state.selected.size < state.filteredUsers.length;
-  }
-  document.querySelectorAll(".user-check").forEach((checkbox) => {
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) state.selected.add(checkbox.dataset.userId);
-      else state.selected.delete(checkbox.dataset.userId);
-      refreshUserTable();
-    });
-  });
 }
 
 function bindConfigEvents() {
@@ -5193,20 +5084,18 @@ function closeDrawer() {
   state.activeDrawerUser = null;
 }
 
-function openActionModal(action, userIds) {
-  const users = userIds.map((id) => state.users.find((user) => user.id === id)).filter(Boolean);
-  if (!users.length) return;
+function openActionModal(action, userId) {
+  const user = state.users.find((item) => item.id === userId);
+  if (!user) return;
   state.modalAction = action;
-  state.modalTargets = users.map((user) => user.id);
+  state.modalTargets = [user.id];
   const isBlock = action === "block";
   document.getElementById("modalTitle").textContent = isBlock ? "确认封禁用户？" : "确认解除封禁？";
   document.getElementById("modalDescription").textContent = isBlock
     ? "封禁后用户将无法登录游戏，并在登录时看到补款引导。"
     : "解封后用户将立即恢复登录权限，请确认补款或申诉已核验。";
   document.getElementById("modalContext").innerHTML =
-    users.length === 1
-      ? `<strong>${users[0].name}</strong> · ${users[0].id}<br>${isBlock ? "累计退款" : "已补款"}：${formatMoney(isBlock ? users[0].refund : users[0].supplement)}`
-      : `本次将批量${isBlock ? "封禁" : "解封"} <strong>${users.length}</strong> 名用户，操作将写入审计日志。`;
+    `<strong>${user.name}</strong> · ${user.id}<br>${isBlock ? "累计退款" : "已补款"}：${formatMoney(isBlock ? user.refund : user.supplement)}`;
   const iconWrap = document.getElementById("modalIcon");
   iconWrap.className = `modal-icon ${isBlock ? "" : "success"}`;
   iconWrap.innerHTML = icon(isBlock ? "lock" : "unlock");
@@ -5230,7 +5119,6 @@ function closeModal() {
 
 function confirmAction() {
   const isBlock = state.modalAction === "block";
-  const count = state.modalTargets.length;
   state.users.forEach((user) => {
     if (state.modalTargets.includes(user.id)) {
       user.status = isBlock ? "blocked" : "recovered";
@@ -5240,14 +5128,13 @@ function confirmAction() {
   state.filteredUsers = state.filteredUsers.map(
     (user) => state.users.find((item) => item.id === user.id) || user,
   );
-  state.selected.clear();
   closeModal();
   closeDrawer();
   renderAllPages();
   switchPage(state.page);
   showToast(
     isBlock ? "封禁操作成功" : "解封操作成功",
-    count > 1 ? `已处理 ${count} 名用户` : "用户状态已更新，审计日志已记录",
+    "用户状态已更新，审计日志已记录",
     "success",
   );
 }
@@ -5291,7 +5178,6 @@ document.getElementById("projectSelect").addEventListener("change", (event) => {
     state.configDirty = false;
   }
   state.project = event.target.value;
-  state.selected.clear();
   state.users = structuredClone(baseUsers).map((user, index) => ({
     ...user,
     refund: Math.round(user.refund * (state.project === "nebula" ? 1 : state.project === "dragon" ? 0.82 : 1.12)),
@@ -5312,10 +5198,7 @@ document.addEventListener("click", (event) => {
   if (viewUser) openDrawer(viewUser.dataset.viewUser);
 
   const action = event.target.closest("[data-user-action]");
-  if (action) openActionModal(action.dataset.userAction, [action.dataset.userId]);
-
-  const bulk = event.target.closest("[data-bulk-action]");
-  if (bulk) openActionModal(bulk.dataset.bulkAction, [...state.selected]);
+  if (action) openActionModal(action.dataset.userAction, action.dataset.userId);
 
   const close = event.target.closest("[data-close-drawer]");
   if (close) closeDrawer();
@@ -5335,9 +5218,7 @@ document.addEventListener("click", (event) => {
   const generalAction = event.target.closest("[data-action]");
   if (generalAction) {
     const actionName = generalAction.dataset.action;
-    if (actionName === "manual-block") {
-      showToast("手动封禁入口", "原型演示：可通过用户列表选择用户后批量封禁", "info");
-    } else if (actionName === "copy-user" && state.activeDrawerUser) {
+    if (actionName === "copy-user" && state.activeDrawerUser) {
       navigator.clipboard?.writeText(state.activeDrawerUser);
       showToast("UID 已复制", state.activeDrawerUser, "success");
     } else if (actionName === "refresh" || actionName === "sync") {
@@ -5984,7 +5865,7 @@ function addRecentOperatorColumn() {
   }
   const rows = table.querySelectorAll("tbody tr");
   if (!state.filteredUsers.length) {
-    rows[0]?.querySelector("td")?.setAttribute("colspan", "10");
+    rows[0]?.querySelector("td")?.setAttribute("colspan", "8");
     return;
   }
   rows.forEach((row, index) => {
