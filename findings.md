@@ -463,6 +463,15 @@
 - 已知当前本地 `file://` 页面读取会被 Browser URL 策略拒绝，本轮遵守安全策略未重复尝试；实际抽屉高度、分隔线和滚动仍需手动刷新复验。
 - 功能提交：`d06d92f`（`fix: consolidate trigger policy modules`）。
 
+## 2026-08-10 / 用户详情人工设置标签移除批注结论
+
+- 删除“仍需补款”指标旁的“人工设置”标签。
+- 同步删除仅供该标签使用的 `.manual-setting-tag`、`.fact-label-row` 样式以及无效的 `isManual` 局部判断。
+- 保留“仍需补款”金额、动态计算、用户级补款要求存储、“设置解封金额”入口和编辑面板。
+- Node.js 内联脚本解析、标签文案移除、旧样式清理、无效变量清理、指标标签保留、入口保留、计算保留、编辑器保留和数据持久化共 8 项断言全部通过；`git diff --check` 通过。
+- 已知本地 `file://` 页面读取会被 Browser URL 策略拒绝，本轮未重复尝试；实际标签消失后的指标间距需手动刷新复验。
+- 功能提交：`baf5eaa`（`fix: remove manual payment badge`）。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
