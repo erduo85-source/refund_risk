@@ -2960,6 +2960,7 @@ svg {
 
 .policy-card-grid {
   display: grid;
+  width: min(100%, 760px);
   grid-template-columns: 1fr;
   gap: 14px;
 }
@@ -7848,6 +7849,12 @@ const policyV3NaturalDescriptions = {
 
 const userPaymentRequirements = new Map();
 
+const policyV3CardTitles = {
+  trigger: "封禁规则配置",
+  recovery: "解封规则配置",
+  channels: "渠道退款配置",
+};
+
 const v3DemoBaseUser = baseUsers.find((user) => user.id === "U-87924130");
 if (v3DemoBaseUser) {
   v3DemoBaseUser.refund = 20000;
@@ -7865,10 +7872,11 @@ userPaymentRequirements.set("nebula:U-87924130", 2000);
 
 renderPolicySummaryCard = function renderPolicySummaryCardV3(key, card) {
   const updateText = policyV2State.updated[key] || "更新时间 2026/07/07 12:00";
-  return `<button class="policy-summary-card" style="--card-accent:${card.color};--card-bg:${card.bg}" type="button" data-policy-card="${key}" aria-label="配置${card.title}">
+  const displayTitle = policyV3CardTitles[key] || card.title;
+  return `<button class="policy-summary-card" style="--card-accent:${card.color};--card-bg:${card.bg}" type="button" data-policy-card="${key}" aria-label="${displayTitle}">
     <span class="policy-card-top">
       <span class="policy-card-icon">${icon(card.icon)}</span>
-      <span class="policy-card-title"><strong>${card.title}</strong><small>${card.subtitle}</small></span>
+      <span class="policy-card-title"><strong>${displayTitle}</strong><small>${card.subtitle}</small></span>
       <span class="policy-card-status">已配置</span>
     </span>
     <span class="policy-card-description">${policyV3NaturalDescriptions[key]}</span>
@@ -7904,9 +7912,8 @@ renderConfig = function renderConfigV3() {
       <span>共 3 组配置</span>
     </div>
     <section class="policy-card-grid" aria-label="退款策略配置卡片">
-      ${Object.entries(policyV2Cards)
-        .filter(([key]) => key === "trigger" || key === "recovery" || key === "channels")
-        .map(([key, card]) => renderPolicySummaryCard(key, card))
+      ${["trigger", "recovery", "channels"]
+        .map((key) => renderPolicySummaryCard(key, policyV2Cards[key]))
         .join("")}
     </section>
   `;
