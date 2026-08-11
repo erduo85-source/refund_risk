@@ -8187,43 +8187,14 @@ function triggerDrawerSection(title, description, content, className = "") {
 }
 
 triggerDrawerContent = function triggerDrawerContentRefined() {
-  const settings = policyV2State.triggerSettings;
-  const relation = `<div class="radio-stack trigger-relation-grid">
-    <label class="radio-option trigger-relation-option ${settings.relation === "any" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-trigger-relation" value="any" ${settings.relation === "any" ? "checked" : ""}><span><strong>满足任一条件即封禁</strong><span>任一已启用规则达到阈值后，立即拦截账号登录</span></span></label>
-    <label class="radio-option trigger-relation-option ${settings.relation === "all" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-trigger-relation" value="all" ${settings.relation === "all" ? "checked" : ""}><span><strong>满足所有条件才封禁</strong><span>所有已启用规则均达到阈值后，才拦截账号登录</span></span></label>
-  </div>`;
-  const period = `<div class="trigger-period-row">
-    <div class="trigger-period-copy">
-      <strong>账号退款统计周期</strong>
-      <span>累计退款金额和累计退款笔数按该周期统计</span>
-    </div>
-    <div class="number-field policy-period-input">
-      <input class="input number-input policy-drawer-input" id="triggerPeriodDays" type="number" value="${settings.periodDays}" min="7" max="360" step="1" inputmode="numeric" required aria-label="账号退款统计周期" aria-describedby="triggerPeriodHint" aria-invalid="false">
-      <span class="suffix">天</span>
-    </div>
-  </div>
-  <p class="policy-field-hint trigger-period-hint" id="triggerPeriodHint">统计该账号近 ${settings.periodDays} 天的退款订单</p>`;
-  const rules = [
-    policyRuleRow("单笔退款金额", "单笔退款达到此金额时触发规则", triggerThresholdControl("singleAmount", settings.thresholds.singleAmount, "元", "单笔退款金额规则")),
-    policyRuleRow("累计退款金额", "统计周期内累计退款达到此金额", triggerThresholdControl("cumulativeAmount", settings.thresholds.cumulativeAmount, "元", "累计退款金额规则")),
-    policyRuleRow("累计退款笔数", "统计周期内退款订单达到此笔数", triggerThresholdControl("cumulativeCount", settings.thresholds.cumulativeCount, "笔", "累计退款笔数规则", 1)),
+  const mainRules = [
+    policyRuleRow("单笔退款金额", "单笔退款达到此金额时触发封禁", amountControl("≥", 128, "元", "单笔退款金额规则")),
+    policyRuleRow("累计退款金额", "在选定周期内累计退款达到此金额", periodRuleControl(300, "元", "累计退款金额规则")),
+    policyRuleRow("累计退款笔数", "在选定周期内识别多笔小额高频退款", periodRuleControl(2, "笔", "累计退款笔数规则")),
   ].join("");
-  const conditions = `<div class="trigger-condition-group">
-    <div class="trigger-condition-heading">
-      <strong>条件关系</strong>
-      <span>选择多条已启用规则之间的计算方式</span>
-    </div>
-    ${relation}
-  </div>
-  <div class="trigger-condition-group trigger-threshold-group">
-    <div class="trigger-condition-heading">
-      <strong>规则阈值</strong>
-      <span>启用规则并配置对应阈值</span>
-    </div>
-    ${rules}
-  </div>`;
-  return triggerDrawerSection("统计范围", "设置累计退款指标的账号回看周期", period, "trigger-period-section")
-    + triggerDrawerSection("封禁条件", "配置条件关系与退款阈值", conditions, "trigger-condition-section");
+  const exemption = policyRuleRow("首次低额退款", "首次退款且金额低于阈值时仅记录", amountControl("低于", 30, "元", "首次低额退款豁免"));
+  return drawerSection("封禁触发条件", "任一启用条件满足时，用户会进入退款风控", mainRules)
+    + drawerSection("低额退款豁免", "减少低价值订单导致的误拦截", exemption);
 };
 
 policyV2State.recoverySettings = {
@@ -8375,47 +8346,7 @@ savePolicyDrawer = function savePolicyDrawerRecoveryRefined() {
 };
 
 const savePolicyDrawerBeforeTriggerRefinement = savePolicyDrawer;
-savePolicyDrawer = function savePolicyDrawerTriggerRefined() {
-  if (policyV2State.activeCard !== "trigger") {
-    savePolicyDrawerBeforeTriggerRefinement();
-    return;
-  }
-  const relation = document.querySelector('input[name="v4-trigger-relation"]:checked')?.value || "any";
-  const periodInput = document.getElementById("triggerPeriodDays");
-  const periodDays = Number(periodInput?.value);
-  if (!periodInput || periodInput.value === "" || !Number.isInteger(periodDays) || periodDays < 7 || periodDays > 360) {
-    periodInput?.classList.add("invalid");
-    periodInput?.setAttribute("aria-invalid", "true");
-    periodInput?.focus();
-    syncTriggerPeriodHint();
-    showToast("请完善封禁规则", "统计周期需填写 7 至 360 天的整数", "warning");
-    return;
-  }
-  const thresholdInputs = Array.from(document.querySelectorAll("[data-trigger-threshold]"));
-  const invalidInput = thresholdInputs.find((input) => {
-    const value = Number(input.value);
-    return input.value === "" || !Number.isFinite(value) || value < Number(input.min || 0);
-  });
-  if (invalidInput) {
-    invalidInput.classList.add("invalid");
-    invalidInput.focus();
-    showToast("请完善封禁规则", "规则阈值不能为空或小于允许的最小值", "warning");
-    return;
-  }
-  const thresholds = Object.fromEntries(
-    thresholdInputs.map((input) => [input.dataset.triggerThreshold, Number(input.value)]),
-  );
-  const enabled = Object.fromEntries(
-    Array.from(document.querySelectorAll("[data-trigger-enabled]"))
-      .map((input) => [input.dataset.triggerEnabled, input.checked]),
-  );
-  policyV2State.triggerSettings = {
-    relation,
-    periodDays,
-    thresholds,
-    enabled,
-  };
-  updateTriggerPolicySummary(policyV2State.triggerSettings);
+savePolicyDrawer = function savePolicyDrawerTriggerVersion4() {
   savePolicyDrawerBeforeTriggerRefinement();
 };
 
