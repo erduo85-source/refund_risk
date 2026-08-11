@@ -514,6 +514,16 @@
 - Browser 运行时因 Windows 沙箱 ACL 异常退出，未切换其他浏览器或绕过限制；弹窗视觉和实际输入回显仍需本地刷新后人工复验。
 - 功能提交：`6a89867`（`fix: restore unblock modal summary`）。
 
+## 2026-08-11 / 解封弹窗已补款与仍需补款并列展示批注结论
+
+- 解封确认弹窗摘要次行由单独显示“已补款”调整为同时显示“已补款”和“仍需补款”。
+- “仍需补款”复用用户详情现有计算口径：`Math.max(getRequiredPaymentTotal(user) - user.supplement, 0)`，支持人工设置的解封补款总额。
+- 封禁确认弹窗仍只显示“累计退款”，没有扩大本轮改动范围。
+- 补款金额非必填、默认带入累计补款及空值回退逻辑保持不变。
+- 内联脚本解析、两项文案、金额公式、摘要渲染、封禁分支、人工金额配置、示例计算和输入框逻辑共 10 项断言全部通过；`git diff --check` 通过。
+- Browser 运行时再次因 Windows 沙箱 ACL 异常退出；未切换其他浏览器或绕过限制，弹窗实际横向间距需本地刷新后人工复验。
+- 功能提交：`2709872`（`fix: show remaining payment in unblock modal`）。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
