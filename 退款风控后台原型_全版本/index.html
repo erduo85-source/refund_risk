@@ -3583,12 +3583,44 @@ svg {
   white-space: nowrap;
 }
 
-.payment-threshold-fact .button {
-  min-height: 26px;
+.payment-threshold-value-row {
   margin-top: 5px;
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+}
+
+.payment-threshold-value-row strong {
+  min-width: 0;
+  margin-top: 0;
+}
+
+.payment-threshold-edit {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
   padding: 0;
-  justify-content: flex-start;
-  font-size: 11px;
+  border: 0;
+  color: var(--primary);
+  background: transparent;
+  border-radius: 4px;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.payment-threshold-edit:hover {
+  background: var(--primary-bg);
+}
+
+.payment-threshold-edit:focus-visible {
+  outline: 2px solid rgba(22, 119, 255, 0.28);
+  outline-offset: 1px;
+}
+
+.payment-threshold-edit svg {
+  width: 14px;
+  height: 14px;
 }
 
 .payment-threshold-panel {
@@ -5302,6 +5334,8 @@ const iconPaths = {
     '<path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 21h14a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2"></path>',
   copy:
     '<rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>',
+  edit:
+    '<path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>',
   shield:
     '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path><path d="m9 12 2 2 4-4"></path>',
   alert:
@@ -8064,7 +8098,7 @@ function enhanceUserPaymentRequirement(userId) {
     const requiredTotal = getRequiredPaymentTotal(user);
     const remaining = Math.max(requiredTotal - user.supplement, 0);
     const isManual = userPaymentRequirements.has(paymentRequirementKey(user.id));
-    targetFact.innerHTML = `<span class="fact-label-row"><span>仍需补款</span>${isManual ? '<span class="manual-setting-tag">人工设置</span>' : ""}</span><strong style="color:${remaining > 0 ? "#d46b08" : "#389e0d"}">${formatMoney(remaining)}</strong><button class="button link" type="button" data-edit-payment-requirement>${icon("settings")}设置解封金额</button>`;
+    targetFact.innerHTML = `<span class="fact-label-row"><span>仍需补款</span>${isManual ? '<span class="manual-setting-tag">人工设置</span>' : ""}</span><span class="payment-threshold-value-row"><strong style="color:${remaining > 0 ? "#d46b08" : "#389e0d"}">${formatMoney(remaining)}</strong><button class="payment-threshold-edit" type="button" data-edit-payment-requirement aria-label="设置补款金额" title="设置补款金额">${icon("edit")}</button></span>`;
     targetFact.querySelector("[data-edit-payment-requirement]").addEventListener("click", () => {
       input.value = requiredTotal;
       error.textContent = "";
