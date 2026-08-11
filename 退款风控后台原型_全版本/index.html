@@ -1322,6 +1322,10 @@ svg {
   color: var(--text-tertiary);
 }
 
+.pagination-bar .pagination-total {
+  margin-right: auto;
+}
+
 .page-button {
   min-width: 32px;
   height: 32px;
@@ -2178,17 +2182,6 @@ svg {
   color: #ff4d4f;
 }
 
-.drawer-order-alert {
-  margin-bottom: 10px;
-  padding: 10px 12px;
-  border: 1px solid #badeff;
-  border-radius: 6px;
-  background: #eaf3ff;
-  color: #245b99;
-  font-size: 12px;
-  line-height: 20px;
-}
-
 .drawer-order-table-shell {
   overflow-x: hidden;
   border: 1px solid var(--border);
@@ -2327,28 +2320,6 @@ svg {
   background: #fafafa;
   border-radius: 7px;
   font-size: 12px;
-}
-
-.modal-payment-field {
-  margin-bottom: 16px;
-}
-
-.modal-money-input {
-  position: relative;
-}
-
-.modal-money-input > span {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  z-index: 1;
-  color: var(--text-secondary);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.modal-money-input .input {
-  padding-left: 30px;
 }
 
 .form-label .required-mark {
@@ -3350,54 +3321,6 @@ svg {
   font-size: 11px;
 }
 
-.channel-config-section .policy-drawer-section-body {
-  padding: 16px;
-}
-
-.channel-config-meta {
-  margin-bottom: 16px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.channel-config-fact {
-  min-height: 64px;
-  padding: 10px 12px;
-  border: 1px solid #e2eaf3;
-  border-radius: 8px;
-  background: #f8fbff;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 6px;
-}
-
-.channel-config-fact > span:first-child {
-  color: var(--text-tertiary);
-  font-size: 11px;
-}
-
-.channel-config-fact strong {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 550;
-}
-
-.channel-config-field label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 550;
-}
-
-.channel-config-field .textarea {
-  min-height: 88px;
-  line-height: 1.6;
-}
-
 @media (max-width: 900px) {
   .policy-mode-grid {
     grid-template-columns: 1fr;
@@ -3422,10 +3345,6 @@ svg {
   }
 
   .policy-drawer .rule-row {
-    grid-template-columns: 1fr;
-  }
-
-  .channel-config-meta {
     grid-template-columns: 1fr;
   }
 
@@ -5295,23 +5214,6 @@ svg {
         <h2 id="modalTitle"></h2>
         <p id="modalDescription"></p>
         <div class="modal-context" id="modalContext"></div>
-        <div class="modal-payment-field" id="modalPaymentField" hidden>
-          <label class="form-label" for="modalSupplementAmount">补款金额</label>
-          <div class="modal-money-input">
-            <span aria-hidden="true">¥</span>
-            <input
-              id="modalSupplementAmount"
-              class="input"
-              type="number"
-              min="0"
-              step="0.01"
-              inputmode="decimal"
-              placeholder="请输入账号已补款的金额"
-              aria-describedby="modalSupplementError"
-            />
-          </div>
-          <div class="form-error" id="modalSupplementError" role="alert" hidden></div>
-        </div>
         <label class="form-label" for="modalReason">操作备注 <span>选填</span></label>
         <textarea
           id="modalReason"
@@ -5955,7 +5857,6 @@ function renderUsers() {
     <section class="card" aria-label="受控用户列表">
       <div class="table-toolbar">
         <strong>用户列表</strong>
-        <span class="muted">共 <span id="resultCount">${state.filteredUsers.length}</span> 条</span>
         <span class="toolbar-spacer" aria-hidden="true"></span>
         <div class="segment" id="storeSegment" aria-label="商店渠道">
           <button class="${state.storeFilter === "all" ? "active" : ""}" type="button" data-store="all">全部渠道</button>
@@ -5980,6 +5881,7 @@ function renderUsers() {
         </table>
       </div>
       <div class="pagination-bar">
+        <span class="pagination-total">共 <span id="resultCount">${state.filteredUsers.length}</span> 条</span>
         <span>每页 20 条</span>
         <button class="page-button" type="button" aria-label="上一页" disabled>‹</button>
         <button class="page-button active" type="button" aria-current="page">1</button>
@@ -6271,14 +6173,14 @@ function renderRefunds() {
       </div>
     </section>
     <section class="card">
-      <div class="table-toolbar"><strong>退款流水</strong><span class="muted">共 ${refundUsers.length} 条</span><span class="toolbar-spacer"></span><div class="segment" aria-label="退款渠道筛选"><button class="${state.refundStoreFilter === "all" ? "active" : ""}" type="button" data-refund-store="all">全部渠道</button><button class="${state.refundStoreFilter === "apple" ? "active" : ""}" type="button" data-refund-store="apple"><span class="mini-platform apple">A</span>App Store</button><button class="${state.refundStoreFilter === "google" ? "active" : ""}" type="button" data-refund-store="google"><span class="mini-platform google"></span>Google Play</button></div></div>
+      <div class="table-toolbar"><strong>退款流水</strong><span class="toolbar-spacer"></span><div class="segment" aria-label="退款渠道筛选"><button class="${state.refundStoreFilter === "all" ? "active" : ""}" type="button" data-refund-store="all">全部渠道</button><button class="${state.refundStoreFilter === "apple" ? "active" : ""}" type="button" data-refund-store="apple"><span class="mini-platform apple">A</span>App Store</button><button class="${state.refundStoreFilter === "google" ? "active" : ""}" type="button" data-refund-store="google"><span class="mini-platform google"></span>Google Play</button></div></div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr><th>#</th><th>退款订单 / 时间</th><th>关联用户</th><th>退款渠道</th><th>退款金额</th><th>风控结果</th><th>操作</th></tr></thead>
           <tbody>${refundRows}</tbody>
         </table>
       </div>
-      <div class="pagination-bar"><span>每页 20 条</span><button class="page-button active" type="button" aria-current="page">1</button></div>
+      <div class="pagination-bar"><span class="pagination-total">共 ${refundUsers.length} 条</span><span>每页 20 条</span><button class="page-button active" type="button" aria-current="page">1</button></div>
     </section>
   `;
   document.getElementById("refundSearch").value = state.refundQuery;
@@ -6706,13 +6608,14 @@ function renderAudit() {
       </div>
     </section>
     <section class="card">
-      <div class="table-toolbar"><strong>日志明细</strong><span class="muted">共 ${logs.length} 条</span></div>
+      <div class="table-toolbar"><strong>日志明细</strong></div>
       <div class="table-wrap">
         <table class="data-table audit-table">
           <thead><tr><th>操作时间</th><th>操作人</th><th>功能模块</th><th>操作类型</th><th>操作前</th><th>操作结果</th></tr></thead>
           <tbody>${renderAuditRows(logs)}</tbody>
         </table>
       </div>
+      <div class="pagination-bar"><span class="pagination-total">共 ${logs.length} 条</span></div>
     </section>
   `;
   bindAuditEvents();
@@ -7182,7 +7085,6 @@ function openDrawer(userId) {
         <ol class="timeline">${renderDrawerRiskTimeline(user)}</ol>
       </div>
       <div class="drawer-panel" id="drawer-orders" role="tabpanel" aria-labelledby="drawer-tab-orders">
-        <div class="drawer-order-alert">账号累计退款 ${user.count} 单，共 ${formatMoney(user.refund)}，当前累计补款 ${formatMoney(user.supplement)}</div>
         <div class="drawer-order-table-shell">
           <table class="drawer-order-table">
             <thead><tr><th class="order-number-cell">退款订单</th><th class="refund-time-cell">退款时间</th></tr></thead>
@@ -7308,7 +7210,7 @@ function openActionModal(action, userId) {
   document.getElementById("modalTitle").textContent = isBlock ? "确认封禁用户？" : "确认解除封禁？";
   document.getElementById("modalDescription").textContent = isBlock
     ? "封禁后用户将无法登录游戏，并在登录时看到补款引导。"
-    : "请输入已核验的补款金额，确认后用户将立即恢复登录权限。";
+    : "确认后用户将立即恢复登录权限，操作将写入审计日志。";
   const remainingPayment = Math.max(getRequiredPaymentTotal(user) - user.supplement, 0);
   const modalAmountSummary = isBlock
     ? `累计退款：${formatMoney(user.refund)}`
@@ -7321,21 +7223,11 @@ function openActionModal(action, userId) {
   const confirm = document.getElementById("modalConfirm");
   confirm.className = `button ${isBlock ? "danger" : ""}`;
   confirm.textContent = isBlock ? "确认封禁" : "确认解封";
-  const paymentField = document.getElementById("modalPaymentField");
-  const paymentInput = document.getElementById("modalSupplementAmount");
-  const paymentError = document.getElementById("modalSupplementError");
-  paymentField.hidden = isBlock;
-  paymentInput.required = false;
-  paymentInput.value = isBlock ? "" : Number(user.supplement).toFixed(2);
-  paymentInput.classList.remove("invalid");
-  paymentInput.setAttribute("aria-invalid", "false");
-  paymentError.hidden = true;
-  paymentError.textContent = "";
   document.getElementById("modalReason").value = "";
   const layer = document.getElementById("modalLayer");
   layer.classList.add("visible");
   layer.setAttribute("aria-hidden", "false");
-  window.setTimeout(() => (isBlock ? confirm : paymentInput).focus(), 30);
+  window.setTimeout(() => confirm.focus(), 30);
 }
 
 function closeModal() {
@@ -7346,30 +7238,8 @@ function closeModal() {
   state.modalTargets = [];
 }
 
-function validateModalSupplementAmount(fallbackAmount = 0) {
-  const input = document.getElementById("modalSupplementAmount");
-  const error = document.getElementById("modalSupplementError");
-  const rawValue = input.value.trim();
-  let message = "";
-  if (rawValue && (!/^\d+(\.\d{1,2})?$/.test(rawValue) || Number(rawValue) < 0)) {
-    message = "请输入不小于 0 且最多保留两位小数的金额";
-  }
-  input.classList.toggle("invalid", Boolean(message));
-  input.setAttribute("aria-invalid", message ? "true" : "false");
-  error.textContent = message;
-  error.hidden = !message;
-  if (message) {
-    input.focus();
-    return null;
-  }
-  return rawValue ? Number(rawValue) : Number(fallbackAmount);
-}
-
 function confirmAction() {
   const isBlock = state.modalAction === "block";
-  const modalUser = state.users.find((user) => state.modalTargets.includes(user.id));
-  const supplementAmount = isBlock ? null : validateModalSupplementAmount(modalUser?.supplement ?? 0);
-  if (!isBlock && supplementAmount === null) return;
   state.users.forEach((user) => {
     if (state.modalTargets.includes(user.id)) {
       user.status = isBlock ? "blocked" : "recovered";
@@ -7377,7 +7247,6 @@ function confirmAction() {
         user.unlockMode = null;
         user.unlockOperator = null;
       } else {
-        user.supplement = supplementAmount;
         user.unlockMode = "manual";
         user.unlockOperator = "张晓齐";
       }
@@ -7396,7 +7265,7 @@ function confirmAction() {
     isBlock ? "封禁操作成功" : "解封操作成功",
     isBlock
       ? "用户状态已更新，审计日志已记录"
-      : `累计补款已更新为 ${formatMoney(supplementAmount)}，审计日志已记录`,
+      : "用户已解封，审计日志已记录",
     "success",
   );
 }
@@ -7532,13 +7401,6 @@ document.getElementById("mobileMenuBtn").addEventListener("click", () => {
 document.getElementById("modalClose").addEventListener("click", closeModal);
 document.getElementById("modalCancel").addEventListener("click", closeModal);
 document.getElementById("modalConfirm").addEventListener("click", confirmAction);
-document.getElementById("modalSupplementAmount").addEventListener("input", (event) => {
-  event.currentTarget.classList.remove("invalid");
-  event.currentTarget.setAttribute("aria-invalid", "false");
-  const error = document.getElementById("modalSupplementError");
-  error.hidden = true;
-  error.textContent = "";
-});
 document.getElementById("modalLayer").addEventListener("click", (event) => {
   if (event.target === event.currentTarget) closeModal();
 });
@@ -7762,44 +7624,14 @@ function recoveryDrawerContent() {
   return drawerSection("补款金额计算", "选择用户需要完成的补款要求", radios) + drawerSection("解封执行", "配置补款完成后的处理方式", autoRules);
 }
 
-policyV2State.channelSettings = {
-  apple: {
-    status: "运行正常",
-    lastSync: "2026-08-11 14:17:36",
-    params: '{"bundleId":"com.yokaverse.nebula","environment":"PROD"}',
-  },
-  google: {
-    status: "运行正常",
-    lastSync: "2026-08-11 14:15:08",
-    params: '{"packageName":"com.yokaverse.nebula","projectId":"nebula-prod"}',
-  },
-};
-
-function channelConfigSection(key, title) {
-  const channel = policyV2State.channelSettings[key];
-  const fieldId = `${key}RefundNotificationParams`;
-  return `<section class="policy-drawer-section channel-config-section">
-    <div class="policy-drawer-section-head">
-      <h3>${title}</h3>
-      <p>展示运行信息并填写退款通知参数</p>
-    </div>
-    <div class="policy-drawer-section-body">
-      <div class="channel-config-meta">
-        <div class="channel-config-fact"><span>运行状态</span><span class="status-tag success">${channel.status}</span></div>
-        <div class="channel-config-fact"><span>最近同步时间</span><strong>${channel.lastSync}</strong></div>
-      </div>
-      <div class="channel-config-field">
-        <label for="${fieldId}">退款通知参数</label>
-        <textarea class="textarea policy-drawer-input" id="${fieldId}" data-channel-params="${key}" rows="3" spellcheck="false" placeholder="请输入 ${title} 退款通知参数" aria-describedby="${fieldId}Hint">${escapePolicyAttribute(channel.params)}</textarea>
-        <p class="policy-field-hint" id="${fieldId}Hint">支持粘贴渠道提供的 JSON 格式退款通知参数</p>
-      </div>
-    </div>
-  </section>`;
-}
-
 function channelsDrawerContent() {
-  return channelConfigSection("apple", "Apple Store")
-    + channelConfigSection("google", "Google Play");
+  const channels = `<div class="channel-compact"><span class="store-symbol apple">A</span><span class="channel-compact-copy"><strong>Apple App Store</strong><small>Server Notifications V2 · 1 分钟前同步</small></span><span class="status-tag success">运行正常</span></div>
+    <div class="channel-compact"><span class="store-symbol google"></span><span class="channel-compact-copy"><strong>Google Play</strong><small>Voided Purchases API · 3 分钟前同步</small></span><span class="status-tag success">运行正常</span></div>`;
+  const sync = [
+    policyRuleRow("漏单扫描频率", "主动拉取商店侧记录，补偿通知丢失", `<select class="select policy-drawer-input" style="width:160px" aria-label="漏单扫描频率"><option>每 5 分钟</option><option>每 10 分钟</option><option>每 30 分钟</option></select>`),
+    policyRuleRow("失败自动重试", "渠道接口异常时自动重试同步任务", `<span>最多 5 次</span><label class="switch"><input class="policy-drawer-input" type="checkbox" checked aria-label="失败自动重试"><span class="switch-track"></span></label>`),
+  ].join("");
+  return drawerSection("商店渠道", "退款通知、主动扫描与订单校验状态", channels) + drawerSection("同步设置", "控制退款记录的补偿扫描策略", sync);
 }
 
 function executionDrawerContent() {
@@ -8306,14 +8138,6 @@ policyV2State.recoverySettings = {
   unlockRule: "auto",
 };
 
-function escapePolicyAttribute(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
 recoveryDrawerContent = function recoveryDrawerContentRefined() {
   const handling = `<div class="radio-stack">
     <label class="radio-option selected"><input class="policy-drawer-input" type="radio" name="v3-recovery" value="auto" checked><span><strong>补款完成后自动解封</strong><span>用户补款达到详情页单独设置的金额后，系统自动恢复登录</span></span></label>
@@ -8399,23 +8223,6 @@ savePolicyDrawer = function savePolicyDrawerRecoveryVersion4() {
 const savePolicyDrawerBeforeTriggerRefinement = savePolicyDrawer;
 savePolicyDrawer = function savePolicyDrawerTriggerVersion4() {
   savePolicyDrawerBeforeTriggerRefinement();
-};
-
-const savePolicyDrawerBeforeChannelRefinement = savePolicyDrawer;
-savePolicyDrawer = function savePolicyDrawerChannelsRefined() {
-  if (policyV2State.activeCard !== "channels") {
-    savePolicyDrawerBeforeChannelRefinement();
-    return;
-  }
-  document.querySelectorAll("[data-channel-params]").forEach((input) => {
-    const key = input.dataset.channelParams;
-    if (!policyV2State.channelSettings[key]) return;
-    policyV2State.channelSettings[key] = {
-      ...policyV2State.channelSettings[key],
-      params: input.value.trim(),
-    };
-  });
-  savePolicyDrawerBeforeChannelRefinement();
 };
 
 const closePolicyDrawerBeforeRefinement = closePolicyDrawer;
