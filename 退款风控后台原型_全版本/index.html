@@ -7120,12 +7120,8 @@ function openDrawer(userId) {
       <div class="drawer-panel active" id="drawer-profile" role="tabpanel" aria-labelledby="drawer-tab-profile">
         <dl class="detail-list">
           <div><dt>SDKID</dt><dd><div class="copy-line"><span class="copy-value">${user.sdkId}</span>${refundCopyButton(user.sdkId, "SDKID")}</div></dd></div>
-          <div><dt>账号名</dt><dd><div class="copy-line"><span class="copy-value">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div></dd></div>
-          <div><dt>UID</dt><dd class="profile-multi-value">${profileUidText}</dd></div>
-          <div><dt>退款渠道</dt><dd class="profile-multi-value">${getProfileStoreNames(profile.refundStores)}</dd></div>
-          <div><dt>最近登录时间</dt><dd>${user.lastLogin}</dd></div>
-          <div><dt>最近登录设备</dt><dd>${user.device}</dd></div>
-          <div><dt>最近登录IP</dt><dd>${profile.lastLoginIp}</dd></div>
+          <div><dt>首次退款时间</dt><dd>${user.firstRefund}</dd></div>
+          <div><dt>最近退款时间</dt><dd>${user.updated}</dd></div>
         </dl>
       </div>
       <div class="drawer-panel" id="drawer-timeline" role="tabpanel" aria-labelledby="drawer-tab-timeline">
