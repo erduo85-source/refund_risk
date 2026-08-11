@@ -2265,43 +2265,11 @@ svg {
 
 .modal-context {
   margin-bottom: 16px;
-  padding: 14px 16px;
-  color: #0958d9;
-  background: #e6f4ff;
-  border: 1px solid #91caff;
-  border-left: 4px solid var(--primary);
-  border-radius: 8px;
+  padding: 11px 12px;
+  color: var(--text-secondary);
+  background: #fafafa;
+  border-radius: 7px;
   font-size: 12px;
-}
-
-.modal-account-line,
-.modal-account-metrics {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 12px;
-}
-
-.modal-account-line {
-  color: #003eb3;
-  font-weight: 600;
-}
-
-.modal-account-line strong {
-  font-size: 14px;
-}
-
-.modal-account-metrics {
-  margin-top: 8px;
-  color: #3f5f87;
-}
-
-.modal-account-metrics strong {
-  color: #102a43;
-}
-
-.modal-account-metrics .danger-value {
-  color: var(--danger);
 }
 
 .modal-payment-field {
@@ -5186,9 +5154,7 @@ svg {
         <p id="modalDescription"></p>
         <div class="modal-context" id="modalContext"></div>
         <div class="modal-payment-field" id="modalPaymentField" hidden>
-          <label class="form-label" for="modalSupplementAmount">
-            补款金额 <span class="required-mark" aria-hidden="true">*</span>
-          </label>
+          <label class="form-label" for="modalSupplementAmount">补款金额</label>
           <div class="modal-money-input">
             <span aria-hidden="true">¥</span>
             <input
@@ -7192,8 +7158,7 @@ function openActionModal(action, userId) {
     ? "封禁后用户将无法登录游戏，并在登录时看到补款引导。"
     : "请输入已核验的补款金额，确认后用户将立即恢复登录权限。";
   document.getElementById("modalContext").innerHTML =
-    `<div class="modal-account-line"><strong>${user.account}</strong><span>SDKID：${user.sdkId}</span></div>
-     <div class="modal-account-metrics"><span>累计退款：<strong class="danger-value">${formatMoney(user.refund)}</strong></span><span>累计补款：<strong>${formatMoney(user.supplement)}</strong></span></div>`;
+    `<strong>${user.name}</strong> · ${user.id}<br>${isBlock ? "累计退款" : "已补款"}：${formatMoney(isBlock ? user.refund : user.supplement)}`;
   const iconWrap = document.getElementById("modalIcon");
   iconWrap.className = `modal-icon ${isBlock ? "" : "success"}`;
   iconWrap.innerHTML = icon(isBlock ? "lock" : "unlock");
@@ -7204,8 +7169,8 @@ function openActionModal(action, userId) {
   const paymentInput = document.getElementById("modalSupplementAmount");
   const paymentError = document.getElementById("modalSupplementError");
   paymentField.hidden = isBlock;
-  paymentInput.required = !isBlock;
-  paymentInput.value = "";
+  paymentInput.required = false;
+  paymentInput.value = isBlock ? "" : Number(user.supplement).toFixed(2);
   paymentInput.classList.remove("invalid");
   paymentInput.setAttribute("aria-invalid", "false");
   paymentError.hidden = true;
@@ -7225,14 +7190,12 @@ function closeModal() {
   state.modalTargets = [];
 }
 
-function validateModalSupplementAmount() {
+function validateModalSupplementAmount(fallbackAmount = 0) {
   const input = document.getElementById("modalSupplementAmount");
   const error = document.getElementById("modalSupplementError");
   const rawValue = input.value.trim();
   let message = "";
-  if (!rawValue) {
-    message = "请输入账号已补款的金额";
-  } else if (!/^\d+(\.\d{1,2})?$/.test(rawValue) || Number(rawValue) < 0) {
+  if (rawValue && (!/^\d+(\.\d{1,2})?$/.test(rawValue) || Number(rawValue) < 0)) {
     message = "请输入不小于 0 且最多保留两位小数的金额";
   }
   input.classList.toggle("invalid", Boolean(message));
@@ -7243,12 +7206,13 @@ function validateModalSupplementAmount() {
     input.focus();
     return null;
   }
-  return Number(rawValue);
+  return rawValue ? Number(rawValue) : Number(fallbackAmount);
 }
 
 function confirmAction() {
   const isBlock = state.modalAction === "block";
-  const supplementAmount = isBlock ? null : validateModalSupplementAmount();
+  const modalUser = state.users.find((user) => state.modalTargets.includes(user.id));
+  const supplementAmount = isBlock ? null : validateModalSupplementAmount(modalUser?.supplement ?? 0);
   if (!isBlock && supplementAmount === null) return;
   state.users.forEach((user) => {
     if (state.modalTargets.includes(user.id)) {
