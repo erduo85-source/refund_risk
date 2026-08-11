@@ -7157,8 +7157,12 @@ function openActionModal(action, userId) {
   document.getElementById("modalDescription").textContent = isBlock
     ? "封禁后用户将无法登录游戏，并在登录时看到补款引导。"
     : "请输入已核验的补款金额，确认后用户将立即恢复登录权限。";
+  const remainingPayment = Math.max(getRequiredPaymentTotal(user) - user.supplement, 0);
+  const modalAmountSummary = isBlock
+    ? `累计退款：${formatMoney(user.refund)}`
+    : `已补款：${formatMoney(user.supplement)}　仍需补款：${formatMoney(remainingPayment)}`;
   document.getElementById("modalContext").innerHTML =
-    `<strong>${user.name}</strong> · ${user.id}<br>${isBlock ? "累计退款" : "已补款"}：${formatMoney(isBlock ? user.refund : user.supplement)}`;
+    `<strong>${user.name}</strong> · ${user.id}<br>${modalAmountSummary}`;
   const iconWrap = document.getElementById("modalIcon");
   iconWrap.className = `modal-icon ${isBlock ? "" : "success"}`;
   iconWrap.innerHTML = icon(isBlock ? "lock" : "unlock");
