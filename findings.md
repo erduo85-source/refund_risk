@@ -493,6 +493,16 @@
 - 本轮未重复请求已被 URL 策略禁止的本地 `file://` DOM 读取；输入框视觉、键盘微调按钮及保存 Toast 仍需手动刷新复验。
 - 功能提交：`1881954`（`fix: allow custom trigger period input`）。
 
+## 2026-08-11 / 用户详情人工设置状态标签恢复批注结论
+
+- 本轮结论覆盖批次 025 的标签移除要求：人工设置过补款金额后，“仍需补款”指标卡右上恢复显示“人工设置”状态标签。
+- 标签按用户级配置条件展示，仅当 `userPaymentRequirements.has(paymentRequirementKey(user.id))` 为真时出现；系统默认计算的补款金额不显示该标签。
+- 参考项目内 `版本4.html` 恢复浅蓝底、蓝色描边与蓝色文字，并补充右对齐布局以满足“右上显示”的明确要求。
+- 保存新的补款金额后继续调用 `refreshTargetFact()`，标签和金额可立即同步刷新；“设置解封金额”入口及原金额计算逻辑保持不变。
+- Node.js 内联脚本解析、条件判断、标签位置、参考样式、演示数据、保存写入与刷新链路共 10 项断言全部通过；`git diff --check` 通过。
+- 已知 in-app Browser URL 策略禁止自动读取当前本地 `file://` 页面，本轮未重复尝试或绕过；实际卡片间距和标签对齐仍需本地刷新后人工复验。
+- 功能提交：`cfbd48e`（`fix: restore manual payment status tag`）。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
