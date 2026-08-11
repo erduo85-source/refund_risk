@@ -2123,31 +2123,31 @@ svg {
 
 .timeline li {
   position: relative;
-  min-height: 72px;
-  padding: 0 0 24px 28px;
+  min-height: 80px;
+  padding: 0 0 22px 28px;
 }
 
 .timeline li::before {
   content: "";
   position: absolute;
-  top: 6px;
-  left: 0;
-  width: 10px;
-  height: 10px;
-  background: var(--timeline-fill, #fff);
-  border: 2px solid var(--timeline-color, var(--primary));
+  top: 5px;
+  left: 5px;
+  width: 8px;
+  height: 8px;
+  background: var(--timeline-color, var(--primary));
+  border: 3px solid var(--timeline-bg, var(--primary-bg));
   border-radius: 50%;
-  box-sizing: border-box;
+  box-sizing: content-box;
 }
 
 .timeline li::after {
   content: "";
   position: absolute;
   top: 20px;
-  bottom: -2px;
-  left: 4px;
+  bottom: 0;
+  left: 11px;
   width: 1px;
-  background: #e8e8e8;
+  background: var(--border);
 }
 
 .timeline li:last-child::after {
@@ -2155,35 +2155,25 @@ svg {
 }
 
 .timeline strong {
-  line-height: 22px;
-  font-size: 14px;
   font-weight: 550;
 }
 
 .timeline p {
-  margin: 3px 0 0;
-  color: var(--text-tertiary);
+  margin: 3px 0;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
 .timeline-operator {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 6px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #eaf3ff;
-  color: #245b99;
-  font-size: 12px;
-  line-height: 20px;
+  display: block;
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 11px;
 }
 
 .timeline time {
-  display: block;
-  margin-top: 2px;
   color: var(--text-tertiary);
-  font-size: 12px;
-  line-height: 20px;
+  font-size: 11px;
 }
 
 .timeline-amount {
@@ -7060,7 +7050,7 @@ function renderDrawerRiskTimeline(user) {
       fill: "#fff",
     },
   );
-  return events.map((event) => `<li style="--timeline-color:${event.color};--timeline-fill:${event.fill}"><strong>${event.title}</strong><time>${event.time}</time><p>${event.detail}</p>${event.operator ? `<span class="timeline-operator">操作人：${event.operator}</span>` : ""}${event.amount ? `<span class="timeline-amount ${event.amountClass}">${event.amount}</span>` : ""}</li>`).join("");
+  return events.map((event) => `<li style="--timeline-color:${event.color};--timeline-bg:${event.fill}"><strong>${event.title}</strong><p>${event.detail}</p><time>${event.time}</time>${event.operator ? `<span class="timeline-operator">操作人：${event.operator}</span>` : ""}${event.amount ? `<span class="timeline-amount ${event.amountClass}">${event.amount}</span>` : ""}</li>`).join("");
 }
 
 function renderDrawerOrderRows(user) {
