@@ -4073,6 +4073,10 @@ svg {
   white-space: normal;
 }
 
+.refund-result-stack > span:only-child {
+  margin-top: 0;
+}
+
 .order-detail-heading strong,
 .order-detail-heading span {
   display: block;
@@ -6065,7 +6069,7 @@ function renderRefundRows(users) {
         <td><div class="refund-id-stack"><div class="copy-line"><span class="copy-value">SDKID：${user.sdkId}</span>${refundCopyButton(user.sdkId, "SDKID")}</div><div class="copy-line secondary"><span class="copy-value">UID：${user.id}</span>${refundCopyButton(user.id, "UID")}</div></div></td>
         <td>${storeBadge(user.store)}</td>
         <td><span class="money danger">${formatMoney(user.refund)}</span></td>
-        <td><div class="refund-result-stack"><strong class="${result.className}">${result.label}</strong><span>${result.detail}</span></div></td>
+        <td><div class="refund-result-stack"><span>${result.detail}</span></div></td>
         <td><div class="row-actions"><button class="button link" type="button" data-view-order="${user.id}">查看订单详情</button><button class="button link" type="button" data-view-user="${user.id}">查看关联用户</button></div></td>
       </tr>`;
     })
