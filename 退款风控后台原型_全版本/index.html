@@ -3769,6 +3769,32 @@ svg {
   gap: 12px;
 }
 
+.policy-config-groups {
+  width: min(100%, 760px);
+  margin-top: 22px;
+  display: grid;
+  gap: 20px;
+}
+
+.policy-config-group {
+  min-width: 0;
+}
+
+.policy-config-group-heading {
+  margin: 0 2px 10px;
+}
+
+.policy-config-group-heading h2 {
+  margin: 0;
+  color: #102a43;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.policy-config-group .policy-card-grid {
+  width: 100%;
+}
+
 .policy-summary-card {
   min-width: 0;
   min-height: 0;
@@ -7896,17 +7922,30 @@ userPaymentRequirements.set("nebula:U-87924130", 2000);
 
 renderPolicySummaryCard = function renderPolicySummaryCardV3(key, card) {
   const updateText = policyV2State.updated[key] || "更新时间 2026/07/07 12:00";
-  const displayTitle = policyV3CardTitles[key] || card.title;
-  return `<button class="policy-summary-card" style="--card-accent:${card.color};--card-bg:${card.bg}" type="button" data-policy-card="${key}" aria-label="${displayTitle}">
+  const groupTitle = policyV3CardTitles[key] || card.title;
+  return `<button class="policy-summary-card" style="--card-accent:${card.color};--card-bg:${card.bg}" type="button" data-policy-card="${key}" aria-label="配置${groupTitle}">
     <span class="policy-card-top">
       <span class="policy-card-icon">${icon(card.icon)}</span>
-      <span class="policy-card-title"><strong>${displayTitle}</strong><small>${card.subtitle}</small></span>
+      <span class="policy-card-title"><strong>${card.title}</strong><small>${card.subtitle}</small></span>
       <span class="policy-card-status">已配置</span>
     </span>
     <span class="policy-card-description">${policyV3NaturalDescriptions[key]}</span>
     <span class="policy-card-footer"><small>${updateText}</small><span>查看并配置 ${icon("arrow")}</span></span>
   </button>`;
 };
+
+function renderPolicyConfigGroup(key) {
+  const card = policyV2Cards[key];
+  const title = policyV3CardTitles[key] || card.title;
+  return `<section class="policy-config-group" aria-labelledby="policy-config-title-${key}">
+    <div class="policy-config-group-heading">
+      <h2 id="policy-config-title-${key}">${title}</h2>
+    </div>
+    <div class="policy-card-grid">
+      ${renderPolicySummaryCard(key, card)}
+    </div>
+  </section>`;
+}
 
 renderConfig = function renderConfigV3() {
   const mode = policyModeMeta(policyV2State.mode);
@@ -7931,13 +7970,9 @@ renderConfig = function renderConfigV3() {
         </div>
       </div>
     </section>
-    <div class="policy-section-heading">
-      <div><h2>策略配置</h2></div>
-      <span>共 3 组配置</span>
-    </div>
-    <section class="policy-card-grid" aria-label="退款策略配置卡片">
+    <section class="policy-config-groups" aria-label="退款策略配置">
       ${["trigger", "recovery", "channels"]
-        .map((key) => renderPolicySummaryCard(key, policyV2Cards[key]))
+        .map((key) => renderPolicyConfigGroup(key))
         .join("")}
     </section>
   `;
