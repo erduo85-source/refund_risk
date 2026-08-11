@@ -7419,7 +7419,7 @@ const policyV2Cards = {
     summary: [["补款方式", "网页自助补款"], ["补款地址", "已配置"], ["解封规则", "自动解封"]],
   },
   channels: {
-    title: "渠道接入状态",
+    title: "支付渠道接入",
     subtitle: "Apple 与 Google 退款数据接入",
     icon: "link",
     color: "#08979c",
@@ -7762,11 +7762,11 @@ renderConfig = function renderConfigV3() {
     </section>
     <div class="policy-section-heading">
       <div><h2>策略配置</h2></div>
-      <span>共 2 组配置</span>
+      <span>共 3 组配置</span>
     </div>
     <section class="policy-card-grid" aria-label="退款策略配置卡片">
       ${Object.entries(policyV2Cards)
-        .filter(([key]) => key === "trigger" || key === "recovery")
+        .filter(([key]) => key === "trigger" || key === "recovery" || key === "channels")
         .map(([key, card]) => renderPolicySummaryCard(key, card))
         .join("")}
     </section>
