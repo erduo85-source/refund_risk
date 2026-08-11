@@ -1957,19 +1957,10 @@ svg {
   margin-left: auto;
 }
 
-.drawer-user-banner {
-  min-height: 68px;
-  padding: 12px 14px;
-  border: 1px solid #badeff;
-  border-radius: 8px;
-  background: #eaf3ff;
-  color: #245b99;
-}
-
 .drawer-user-identifiers {
   min-width: 0;
   display: grid;
-  gap: 5px;
+  gap: 3px;
 }
 
 .drawer-user-identifiers .copy-line {
@@ -1980,18 +1971,14 @@ svg {
   max-width: 320px;
 }
 
-.drawer-user-banner .inline-copy-button {
-  color: #4e77a4;
-}
-
 .drawer-user-account {
-  color: #124a87;
-  font-size: 15px;
+  color: var(--text);
+  font-size: 16px;
   font-weight: 600;
 }
 
 .drawer-user-uid {
-  color: #4e77a4;
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
@@ -2685,17 +2672,13 @@ svg {
     grid-template-columns: 1fr 1fr;
   }
 
-  .drawer-user:not(.drawer-user-banner) {
+  .drawer-user {
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
-  .drawer-user:not(.drawer-user-banner) .status-tag {
+  .drawer-user .status-tag {
     margin-left: 57px;
-  }
-
-  .drawer-user-banner {
-    align-items: flex-start;
   }
 
   .drawer-user-identifiers .copy-value {
@@ -7110,7 +7093,7 @@ function openDrawer(userId) {
     </div>
     <div class="drawer-scroll-body">
       <div class="drawer-summary">
-        <div class="drawer-user drawer-user-banner">
+        <div class="drawer-user">
           <div class="drawer-user-identifiers">
             <div class="copy-line"><span class="copy-value drawer-user-account">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div>
             <div class="copy-line"><span class="copy-value drawer-user-uid">UID：${profileUidText}</span>${refundCopyButton(profileUidText, "UID")}</div>
