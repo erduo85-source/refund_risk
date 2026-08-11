@@ -206,6 +206,7 @@ svg {
 }
 
 .nav-item,
+.nav-section-toggle,
 .help-link {
   width: 100%;
   min-height: 44px;
@@ -222,13 +223,20 @@ svg {
   transition:
     color 180ms ease,
     background 180ms ease;
+  font-family: inherit;
 }
 
 .nav-item + .nav-item {
   margin-top: 4px;
 }
 
+.nav-section-toggle + .nav-group,
+.nav-group + .nav-item {
+  margin-top: 4px;
+}
+
 .nav-item:hover,
+.nav-section-toggle:hover,
 .help-link:hover {
   color: var(--primary);
   background: var(--sidebar-hover);
@@ -252,30 +260,85 @@ svg {
   border-radius: 0 4px 4px 0;
 }
 
+.nav-section-toggle {
+  color: #364153;
+}
+
+.nav-icon-image,
+.nav-caret,
+.nav-caret img,
+.nav-subitem-spacer {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.nav-icon-image,
+.nav-caret img {
+  display: block;
+}
+
+.nav-section-label {
+  min-width: 0;
+  flex: 1;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.nav-caret {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+}
+
+.nav-payment-link .nav-caret img {
+  transform: rotate(-90deg);
+}
+
+.nav-refund-toggle .nav-caret img {
+  transform: rotate(180deg);
+  transition: transform 180ms ease;
+}
+
+.nav-refund-toggle[aria-expanded="false"] .nav-caret img {
+  transform: rotate(-90deg);
+}
+
+.nav-sublist[hidden] {
+  display: none;
+}
+
+.nav-sublist {
+  margin: 0;
+  padding: 0;
+}
+
+.nav-sublist .nav-item + .nav-item {
+  margin-top: 0;
+}
+
+.nav-subitem {
+  min-height: 44px;
+  color: #364153;
+}
+
+.nav-subitem.active {
+  color: #155dfc;
+  background: #eff6ff;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.nav-subitem.active::before {
+  display: none;
+}
+
 .nav-icon,
 .nav-icon svg,
 .help-link svg {
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
-}
-
-.nav-count {
-  min-width: 22px;
-  height: 20px;
-  margin-left: auto;
-  padding: 0 6px;
-  color: #52647a;
-  background: #edf2f7;
-  border-radius: 10px;
-  font-size: 12px;
-  line-height: 20px;
-  text-align: center;
-}
-
-.nav-item.active .nav-count {
-  color: #fff;
-  background: var(--primary);
 }
 
 .sidebar-foot {
@@ -5023,21 +5086,36 @@ svg {
     <div class="app-shell">
       <aside class="sidebar" id="sidebar" aria-label="主导航">
         <nav class="nav-list" id="mainNav">
-          <button class="nav-item active" data-page="users" type="button">
-            <span class="nav-icon" data-icon="users"></span>
-            <span>受控用户</span>
-            <span class="nav-count" id="riskNavCount">24</span>
+          <button class="nav-section-toggle nav-payment-link" data-nav-section="payment" type="button">
+            <img class="nav-icon-image" src="assets/nav-payment-risk.svg" alt="" />
+            <span class="nav-section-label">支付风控</span>
+            <span class="nav-caret" aria-hidden="true"><img src="assets/nav-chevron-right.svg" alt="" /></span>
           </button>
-          <button class="nav-item" data-page="refunds" type="button">
-            <span class="nav-icon" data-icon="receipt"></span>
-            <span>退款记录</span>
-          </button>
-          <button class="nav-item" data-page="config" type="button">
-            <span class="nav-icon" data-icon="settings"></span>
-            <span>退款策略</span>
-          </button>
-          <button class="nav-item" data-page="audit" type="button">
-            <span class="nav-icon" data-icon="audit"></span>
+
+          <div class="nav-group">
+            <button class="nav-section-toggle nav-refund-toggle" data-nav-toggle="refund" type="button" aria-expanded="true" aria-controls="refundNavSublist">
+              <img class="nav-icon-image" src="assets/nav-refund-risk.svg" alt="" />
+              <span class="nav-section-label">退款风控</span>
+              <span class="nav-caret" aria-hidden="true"><img src="assets/nav-chevron-up.svg" alt="" /></span>
+            </button>
+            <div class="nav-sublist" id="refundNavSublist">
+              <button class="nav-item nav-subitem active" data-page="users" type="button">
+                <span class="nav-subitem-spacer" aria-hidden="true"></span>
+                <span>受控用户</span>
+              </button>
+              <button class="nav-item nav-subitem" data-page="refunds" type="button">
+                <span class="nav-subitem-spacer" aria-hidden="true"></span>
+                <span>退款记录</span>
+              </button>
+              <button class="nav-item nav-subitem" data-page="config" type="button">
+                <span class="nav-subitem-spacer" aria-hidden="true"></span>
+                <span>退款策略</span>
+              </button>
+            </div>
+          </div>
+
+          <button class="nav-item nav-root-item" data-page="audit" type="button">
+            <img class="nav-icon-image" src="assets/nav-audit.svg" alt="" />
             <span>操作日志</span>
           </button>
         </nav>
@@ -5083,7 +5161,7 @@ svg {
           <nav class="global-nav" aria-label="平台一级导航">
             <button type="button" data-global-nav="console">游戏控制台</button>
             <button class="active" type="button" data-global-nav="risk" aria-current="page">
-              退款风控<span data-icon="chevron-down"></span>
+              支付风控<span data-icon="chevron-down"></span>
             </button>
             <button type="button" data-global-nav="project">项目管理</button>
           </nav>
@@ -6657,7 +6735,6 @@ function renderAllPages() {
   renderRefunds();
   renderConfig();
   renderAudit();
-  document.getElementById("riskNavCount").textContent = projects[state.project].riskCount;
 }
 
 function bindUsersEvents() {
@@ -6882,9 +6959,18 @@ function bindConfigEvents() {
   });
 }
 
+function setRefundNavExpanded(expanded) {
+  const toggle = document.querySelector('[data-nav-toggle="refund"]');
+  const sublist = document.getElementById("refundNavSublist");
+  if (!toggle || !sublist) return;
+  toggle.setAttribute("aria-expanded", String(expanded));
+  sublist.hidden = !expanded;
+}
+
 function switchPage(page) {
   if (!pageTitles[page]) return;
   state.page = page;
+  if (["users", "refunds", "config"].includes(page)) setRefundNavExpanded(true);
   document.querySelectorAll(".page").forEach((section) => section.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach((button) =>
     button.classList.toggle("active", button.dataset.page === page),
@@ -7283,6 +7369,18 @@ function closeMobileNav() {
 }
 
 document.getElementById("mainNav").addEventListener("click", (event) => {
+  const paymentSection = event.target.closest('[data-nav-section="payment"]');
+  if (paymentSection) {
+    showToast("支付风控", "当前原型展示退款风控子模块", "info");
+    return;
+  }
+
+  const refundToggle = event.target.closest('[data-nav-toggle="refund"]');
+  if (refundToggle) {
+    setRefundNavExpanded(refundToggle.getAttribute("aria-expanded") !== "true");
+    return;
+  }
+
   const button = event.target.closest("[data-page]");
   if (button) switchPage(button.dataset.page);
 });
@@ -8335,12 +8433,12 @@ document.querySelectorAll("[data-global-nav]").forEach((button) => {
   button.addEventListener("click", () => {
     const target = button.dataset.globalNav;
     if (target === "risk") {
-      showToast("退款风控", "当前正在使用退款风控模块", "info");
+      showToast("支付风控", "当前正在使用支付风控模块", "info");
       return;
     }
     showToast(
       target === "console" ? "游戏控制台" : "项目管理",
-      "该一级模块不在本次退款风控原型范围内",
+      "该一级模块不在本次支付风控原型范围内",
       "info",
     );
   });
