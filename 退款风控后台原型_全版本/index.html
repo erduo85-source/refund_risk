@@ -2157,6 +2157,10 @@ svg {
   color: #ff4d4f;
 }
 
+.timeline-amount.manual {
+  color: #1677ff;
+}
+
 .drawer-order-table-shell {
   overflow-x: hidden;
   border: 1px solid var(--border);
@@ -6970,7 +6974,8 @@ function renderDrawerRiskTimeline(user) {
         fill: "#f6ffed",
       }
       : { title: "账号进入观察", detail: user.trigger, color: "#1677ff", fill: "#e6f4ff" };
-  const events = [{ ...currentEvent, time: user.updated }];
+  const paymentRequirementEvents = Array.isArray(user.paymentRequirementEvents) ? user.paymentRequirementEvents : [];
+  const events = [...paymentRequirementEvents, { ...currentEvent, time: user.updated }];
   if (user.supplement > 0) {
     events.push({
       title: "玩家自助补款",
@@ -7981,7 +7986,23 @@ function enhanceUserPaymentRequirement(userId) {
       input.focus();
       return;
     }
+    const previousAmount = getRequiredPaymentTotal(user);
     userPaymentRequirements.set(paymentRequirementKey(user.id), amount);
+    if (amount !== previousAmount) {
+      const eventTime = shiftDrawerDateTime(new Date().toISOString());
+      user.paymentRequirementEvents = [{
+        title: "人工设置补款金额",
+        detail: `解封所需补款总额由 ${formatMoney(previousAmount)} 调整为 ${formatMoney(amount)}`,
+        time: eventTime,
+        amount: formatMoney(amount),
+        amountClass: "manual",
+        operator: "张晓齐",
+        color: "#1677ff",
+        fill: "#e6f4ff",
+      }, ...(Array.isArray(user.paymentRequirementEvents) ? user.paymentRequirementEvents : [])];
+      const timeline = document.querySelector("#drawer-timeline .timeline");
+      if (timeline) timeline.innerHTML = renderDrawerRiskTimeline(user);
+    }
     editor.hidden = true;
     refreshTargetFact();
     const remaining = Math.max(amount - user.supplement, 0);
