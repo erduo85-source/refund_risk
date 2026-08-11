@@ -1316,3 +1316,47 @@
 | 2026-08-11 | 首次精确搜索未命中补款计算函数 | 1 | 文件未修改；扩大关键词范围后定位现有函数 |
 | 2026-08-11 | 首轮文案断言中的全角冒号经管道转码 | 1 | 3 项断言误报；改用 Unicode 转义后 10 项全部通过 |
 | 2026-08-11 | Browser 运行时因 Windows 沙箱 ACL 异常退出 | 1 | 未绕过限制，记录视觉为未验证 |
+
+## 2026-08-11 / 批次 031：支付渠道接入策略卡片恢复
+
+| 项目 | 内容 |
+|---|---|
+| Files | `退款风控后台原型_全版本/index.html`、`task_plan.md`、`findings.md`、`progress.md` |
+| Action | 对照版本4恢复第三张“支付渠道接入”卡片及现有配置抽屉入口 |
+| Verify | 内联脚本解析、10 项静态断言、Git 空白检查、Browser 连接尝试 |
+| Done | 策略配置展示 3 张卡片，第三张为支付渠道接入；执行与通知继续隐藏 |
+| Result | 卡片标题、数量、顺序、说明、抽屉和点击链路均通过静态验证 |
+| Risk | Browser 运行时受 Windows ACL 异常阻断，卡片对齐与抽屉视觉需本地刷新复验 |
+| Commit | `73f99ba`（`fix: restore payment channel policy card`） |
+
+### 批次 031 完成操作
+
+- 将 `policyV2Cards.channels` 标题更新为“支付渠道接入”。
+- 最终策略渲染过滤器重新包含 `channels`，同时继续排除 `execution`。
+- 策略配置数量从 2 组更新为 3 组。
+- 复用版本4保留的渠道说明、Apple/Google 数据和渠道配置抽屉。
+
+### 批次 031 验证结果
+
+| 检查项 | 预期 | 实际 | 状态 |
+|---|---|---|---|
+| 最终渲染器 | 修改当前生效的 V3 覆盖逻辑 | `renderConfigV3` 精确命中 | 通过 |
+| 卡片标题 | 第三张为支付渠道接入 | `policyV2Cards.channels.title` 命中 | 通过 |
+| 配置数量 | 展示共 3 组配置 | 最终模板命中 | 通过 |
+| 渠道卡片 | 最终过滤器包含 channels | `key === "channels"` 命中 | 通过 |
+| 执行通知 | 继续隐藏 | 最终过滤器不包含 execution | 通过 |
+| 卡片顺序 | trigger、recovery、channels | 对象顺序和过滤顺序一致 | 通过 |
+| 自然语言说明 | 渠道状态说明可展示 | `policyV3NaturalDescriptions.channels` 保留 | 通过 |
+| 配置抽屉 | 点击可打开渠道配置 | `channelsDrawerContent` 工厂映射保留 | 通过 |
+| 渠道详情 | Apple、Google 与同步配置存在 | Voided Purchases 等内容命中 | 通过 |
+| 点击绑定 | 卡片按钮触发抽屉 | `openPolicyDrawer(button.dataset.policyCard, button)` 保留 | 通过 |
+| 内联脚本 | HTML 脚本可解析 | 1 个内联脚本通过 `new Function` 解析 | 通过 |
+| Git 空白检查 | 无尾随空白或补丁错误 | `git diff --check` 无错误 | 通过 |
+| 浏览器视觉 | 核对第三张卡片与抽屉 | Browser 运行时因 Windows ACL 异常退出 | 未验证 |
+
+### 批次 031 错误与处理
+
+| 时间 | 错误 | 尝试 | 处理结果 |
+|---|---|---:|---|
+| 2026-08-11 | 首次组合搜索被 PowerShell 拆分为错误路径参数 | 1 | 文件未修改；拆为多个单引号关键词后完成定位 |
+| 2026-08-11 | Browser 运行时因 Windows 沙箱 ACL 异常退出 | 1 | 未绕过限制，记录视觉为未验证 |
