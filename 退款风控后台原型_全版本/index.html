@@ -3516,6 +3516,29 @@ svg {
   position: relative;
 }
 
+.fact-label-row {
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.fact .manual-setting-tag {
+  min-height: 18px;
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid #91caff;
+  color: #0958d9;
+  background: #e6f4ff;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .payment-threshold-fact .button {
   min-height: 26px;
   margin-top: 5px;
@@ -7936,7 +7959,8 @@ function enhanceUserPaymentRequirement(userId) {
   function refreshTargetFact() {
     const requiredTotal = getRequiredPaymentTotal(user);
     const remaining = Math.max(requiredTotal - user.supplement, 0);
-    targetFact.innerHTML = `<span>仍需补款</span><strong style="color:${remaining > 0 ? "#d46b08" : "#389e0d"}">${formatMoney(remaining)}</strong><button class="button link" type="button" data-edit-payment-requirement>${icon("settings")}设置解封金额</button>`;
+    const isManual = userPaymentRequirements.has(paymentRequirementKey(user.id));
+    targetFact.innerHTML = `<span class="fact-label-row"><span>仍需补款</span>${isManual ? '<span class="manual-setting-tag">人工设置</span>' : ""}</span><strong style="color:${remaining > 0 ? "#d46b08" : "#389e0d"}">${formatMoney(remaining)}</strong><button class="button link" type="button" data-edit-payment-requirement>${icon("settings")}设置解封金额</button>`;
     targetFact.querySelector("[data-edit-payment-requirement]").addEventListener("click", () => {
       input.value = requiredTotal;
       error.textContent = "";
