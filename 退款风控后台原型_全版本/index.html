@@ -2168,8 +2168,8 @@ svg {
 }
 
 .timeline-amount {
-  display: block;
-  margin-top: 2px;
+  display: inline;
+  margin-left: 8px;
   font-size: 13px;
   font-weight: 550;
 }
@@ -6980,16 +6980,16 @@ function buildDrawerRefundOrders(user) {
 function renderDrawerRiskTimeline(user) {
   const isManualUnlock = user.status === "recovered" && user.unlockMode === "manual";
   const currentEvent = user.status === "blocked"
-    ? { title: "系统自动封禁", detail: user.trigger, color: "#ff4d4f", fill: "#ff4d4f" }
+    ? { title: "系统自动封禁", detail: user.trigger, color: "#ff4d4f", fill: "#fff2f0" }
     : user.status === "recovered"
       ? {
         title: isManualUnlock ? "人工手动解封" : "系统自动解封",
         detail: isManualUnlock ? "运营人工核验后解除登录拦截" : "补款条件已满足，账号恢复登录",
         operator: isManualUnlock ? (user.unlockOperator || "未知") : "",
         color: "#52c41a",
-        fill: "#52c41a",
+        fill: "#f6ffed",
       }
-      : { title: "账号进入观察", detail: user.trigger, color: "#1677ff", fill: "#1677ff" };
+      : { title: "账号进入观察", detail: user.trigger, color: "#1677ff", fill: "#e6f4ff" };
   const events = [{ ...currentEvent, time: user.updated }];
   if (user.supplement > 0) {
     events.push({
@@ -6999,7 +6999,7 @@ function renderDrawerRiskTimeline(user) {
       amount: `+${formatMoney(user.supplement)}`,
       amountClass: "positive",
       color: "#1677ff",
-      fill: "#fff",
+      fill: "#e6f4ff",
     });
   }
   events.push(
@@ -7010,17 +7010,17 @@ function renderDrawerRiskTimeline(user) {
       amount: `-${formatMoney(user.refund)}`,
       amountClass: "negative",
       color: "#fa8c16",
-      fill: "#fff",
+      fill: "#fffbe6",
     },
     {
       title: "游戏资产核查完成",
       detail: "退款关联商品存在已消耗记录",
       time: user.firstRefund,
       color: "#1677ff",
-      fill: "#fff",
+      fill: "#e6f4ff",
     },
   );
-  return events.map((event) => `<li style="--timeline-color:${event.color};--timeline-bg:${event.fill}"><strong>${event.title}</strong><p>${event.detail}</p><time>${event.time}</time>${event.operator ? `<span class="timeline-operator">操作人：${event.operator}</span>` : ""}${event.amount ? `<span class="timeline-amount ${event.amountClass}">${event.amount}</span>` : ""}</li>`).join("");
+  return events.map((event) => `<li style="--timeline-color:${event.color};--timeline-bg:${event.fill}"><strong>${event.title}${event.amount ? `<span class="timeline-amount ${event.amountClass}">${event.amount}</span>` : ""}</strong><p>${event.detail}</p><time>${event.time}</time>${event.operator ? `<span class="timeline-operator">操作人：${event.operator}</span>` : ""}</li>`).join("");
 }
 
 function renderDrawerOrderRows(user) {
