@@ -2960,7 +2960,7 @@ svg {
 
 .policy-card-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 14px;
 }
 
@@ -3469,36 +3469,6 @@ svg {
   background: rgba(255, 255, 255, 0.9);
 }
 
-.policy-status-facts {
-  position: relative;
-  z-index: 1;
-  margin: 18px 0 0 57px;
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  color: #607a96;
-  font-size: 12px;
-}
-
-.policy-status-facts span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.policy-status-facts span + span::before {
-  content: "";
-  width: 1px;
-  height: 14px;
-  margin-right: 16px;
-  background: #bdd7f2;
-}
-
-.policy-status-facts strong {
-  color: #284a6c;
-  font-weight: 550;
-}
-
 .policy-summary-card {
   min-height: 200px;
 }
@@ -3757,17 +3727,6 @@ svg {
     margin-left: 0;
   }
 
-  .policy-status-facts {
-    margin-left: 0;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .policy-status-facts span + span::before {
-    display: none;
-  }
-
   .payment-input-row {
     grid-template-columns: 1fr;
   }
@@ -3783,13 +3742,13 @@ svg {
 }
 
 .policy-card-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 
 .policy-summary-card {
   min-width: 0;
-  min-height: 216px;
+  min-height: 0;
   padding: 16px;
   border-color: #dfe8f3;
   border-radius: 12px;
@@ -3835,7 +3794,7 @@ svg {
 }
 
 .policy-card-description {
-  min-height: 76px;
+  min-height: 0;
   margin-top: 14px;
   padding: 11px 12px;
   font-size: 12px;
@@ -4767,7 +4726,7 @@ svg {
 
 @media (max-width: 1080px) {
   .policy-card-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 }
 
@@ -7938,10 +7897,6 @@ renderConfig = function renderConfigV3() {
         <div class="policy-status-actions">
           <button class="button secondary" type="button" data-policy-status-edit>${icon("settings")}修改状态</button>
         </div>
-      </div>
-      <div class="policy-status-facts">
-        <span>最近发布 <strong>今天 14:18</strong></span>
-        <span>操作人 <strong>林晓</strong></span>
       </div>
     </section>
     <div class="policy-section-heading">
