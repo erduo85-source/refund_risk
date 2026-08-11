@@ -8212,34 +8212,17 @@ function escapePolicyAttribute(value) {
 }
 
 recoveryDrawerContent = function recoveryDrawerContentRefined() {
-  const settings = policyV2State.recoverySettings;
-  const isWeb = settings.paymentMethod === "web";
-  const paymentMethods = `<div class="radio-stack">
-    <div class="radio-option payment-method-option ${settings.paymentMethod === "service" ? "selected" : ""}">
-      <input class="policy-drawer-input" id="paymentMethodService" type="radio" name="v4-payment-method" value="service" ${settings.paymentMethod === "service" ? "checked" : ""}>
-      <label class="payment-method-copy" for="paymentMethodService"><strong>联系客服补款</strong><span>玩家通过客服渠道完成补款，由客服核验到账结果</span></label>
-    </div>
-    <div class="radio-option payment-method-option ${isWeb ? "selected" : ""}">
-      <input class="policy-drawer-input" id="paymentMethodWeb" type="radio" name="v4-payment-method" value="web" ${isWeb ? "checked" : ""}>
-      <label class="payment-method-copy" for="paymentMethodWeb"><strong>网页自助补款</strong><span>玩家打开补款页面自主完成支付，到账结果自动回传</span></label>
-      <div class="payment-method-address" id="recoveryPaymentAddressField" ${isWeb ? "" : "hidden"}>
-        <div class="payment-method-address-label">补款地址 <span class="required-mark" aria-hidden="true">*</span></div>
-        <input class="input policy-drawer-input" id="recoveryPaymentAddress" type="url" value="${escapePolicyAttribute(settings.paymentUrl)}" placeholder="请输入网页自助补款地址" aria-label="补款地址" aria-describedby="recoveryPaymentAddressHint recoveryPaymentAddressError">
-        <p class="policy-field-hint" id="recoveryPaymentAddressHint">补款地址可在充值中心后台配置网页支付后获取</p>
-        <p class="policy-field-error" id="recoveryPaymentAddressError" role="alert" hidden></p>
-      </div>
-    </div>
+  const handling = `<div class="radio-stack">
+    <label class="radio-option selected"><input class="policy-drawer-input" type="radio" name="v3-recovery" value="auto" checked><span><strong>补款完成后自动解封</strong><span>用户补款达到详情页单独设置的金额后，系统自动恢复登录</span></span></label>
+    <label class="radio-option"><input class="policy-drawer-input" type="radio" name="v3-recovery" value="manual"><span><strong>补款完成后人工审核</strong><span>达到设置金额后进入待审核列表，由运营确认是否解封</span></span></label>
   </div>`;
-  const unlockRules = `<div class="radio-stack">
-    <label class="radio-option ${settings.unlockRule === "auto" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-unlock-rule" value="auto" ${settings.unlockRule === "auto" ? "checked" : ""}><span><strong>补款后自动解封</strong><span>补款达到用户详情中单独设置的金额后，系统自动恢复登录</span></span></label>
-    <label class="radio-option ${settings.unlockRule === "manual" ? "selected" : ""}"><input class="policy-drawer-input" type="radio" name="v4-unlock-rule" value="manual" ${settings.unlockRule === "manual" ? "checked" : ""}><span><strong>补款后人工审核</strong><span>补款达到设置金额后进入待审核列表，由运营确认是否解封</span></span></label>
-  </div>`;
-  return drawerSection("补款方式", "选择玩家完成补款的入口", paymentMethods)
-    + drawerSection("解封规则", "配置补款达标后的账号处理方式", unlockRules);
+  const repeatedRefund = policyRuleRow("二次退款加重处理", "已补款解封用户再次退款时转为人工审核", `<label class="switch"><input class="policy-drawer-input" type="checkbox" checked aria-label="二次退款加重处理"><span class="switch-track"></span></label>`);
+  return drawerSection("补款金额计算", "补款金额在受控用户详情中按用户单独设置", handling)
+    + drawerSection("重复退款处理", "控制已解封用户再次退款后的处置方式", repeatedRefund);
 };
 
 updateTriggerPolicySummary(policyV2State.triggerSettings);
-policyV3NaturalDescriptions.recovery = "支持<strong>联系客服补款</strong>或<strong>网页自助补款</strong>；补款达标后可自动解封或进入人工审核。";
+policyV3NaturalDescriptions.recovery = "补款金额在用户详情中<strong>按用户单独设置</strong>；达到指定金额后自动解封，也可选择进入人工审核。";
 
 function syncTriggerPeriodHint() {
   const input = document.getElementById("triggerPeriodDays");
@@ -8306,42 +8289,7 @@ openPolicyDrawer = function openPolicyDrawerRefined(key, trigger) {
 };
 
 const savePolicyDrawerBeforeRecoveryRefinement = savePolicyDrawer;
-savePolicyDrawer = function savePolicyDrawerRecoveryRefined() {
-  if (policyV2State.activeCard !== "recovery") {
-    savePolicyDrawerBeforeRecoveryRefinement();
-    return;
-  }
-  const paymentMethod = document.querySelector('input[name="v4-payment-method"]:checked')?.value || "service";
-  const unlockRule = document.querySelector('input[name="v4-unlock-rule"]:checked')?.value || "auto";
-  const addressInput = document.getElementById("recoveryPaymentAddress");
-  const addressError = document.getElementById("recoveryPaymentAddressError");
-  const paymentUrl = addressInput?.value.trim() || "";
-  let validAddress = paymentMethod !== "web";
-  if (paymentMethod === "web" && paymentUrl) {
-    try {
-      const parsedUrl = new URL(paymentUrl);
-      validAddress = parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
-    } catch {
-      validAddress = false;
-    }
-  }
-  if (!validAddress) {
-    const message = paymentUrl ? "请输入有效的 http 或 https 补款地址" : "请输入网页自助补款地址";
-    addressInput?.classList.add("invalid");
-    addressInput?.setAttribute("aria-invalid", "true");
-    if (addressError) {
-      addressError.textContent = message;
-      addressError.hidden = false;
-    }
-    addressInput?.focus();
-    showToast("请完善补款地址", message, "warning");
-    return;
-  }
-  policyV2State.recoverySettings = {
-    paymentMethod,
-    paymentUrl,
-    unlockRule,
-  };
+savePolicyDrawer = function savePolicyDrawerRecoveryVersion4() {
   savePolicyDrawerBeforeRecoveryRefinement();
 };
 
