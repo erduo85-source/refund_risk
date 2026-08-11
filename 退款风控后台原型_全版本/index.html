@@ -1961,31 +1961,6 @@ svg {
   margin-left: auto;
 }
 
-.drawer-user-identifiers {
-  min-width: 0;
-  display: grid;
-  gap: 3px;
-}
-
-.drawer-user-identifiers .copy-line {
-  min-width: 0;
-}
-
-.drawer-user-identifiers .copy-value {
-  max-width: 320px;
-}
-
-.drawer-user-account {
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.drawer-user-uid {
-  color: var(--text-tertiary);
-  font-size: 12px;
-}
-
 .drawer-actions {
   margin-top: 18px;
   display: flex;
@@ -2650,10 +2625,6 @@ svg {
 
   .drawer-user .status-tag {
     margin-left: 57px;
-  }
-
-  .drawer-user-identifiers .copy-value {
-    max-width: 210px;
   }
 
   .detail-list > div {
@@ -7045,8 +7016,6 @@ function getProfileStoreNames(stores) {
 function openDrawer(userId) {
   const user = state.users.find((item) => item.id === userId);
   if (!user) return;
-  const profile = getUserProfileDetails(user);
-  const profileUidText = profile.uids.join("、");
   state.activeDrawerUser = userId;
   const need = Math.max(user.refund - user.supplement, 0);
   document.getElementById("drawerContent").innerHTML = `
@@ -7057,10 +7026,8 @@ function openDrawer(userId) {
     <div class="drawer-scroll-body">
       <div class="drawer-summary">
         <div class="drawer-user">
-          <div class="drawer-user-identifiers">
-            <div class="copy-line"><span class="copy-value drawer-user-account">${user.account}</span>${refundCopyButton(user.account, "账号名")}</div>
-            <div class="copy-line"><span class="copy-value drawer-user-uid">UID：${profileUidText}</span>${refundCopyButton(profileUidText, "UID")}</div>
-          </div>
+          <span class="user-avatar">${user.avatar}</span>
+          <div><h3>SDKID：${user.sdkId}</h3><p>最近退款时间：${user.updated} · 首次退款时间：${user.firstRefund}</p></div>
           ${statusTag(user.status)}
         </div>
         <div class="drawer-facts">
