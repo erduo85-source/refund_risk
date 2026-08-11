@@ -579,6 +579,17 @@
 - Browser 运行时因 Windows 沙箱 ACL 异常退出；未切换其他浏览器或绕过限制，抽屉实际分组、单选项、开关与保存反馈需本地刷新后人工复验。
 - 功能提交：`dae6b3a`（`fix: restore version 4 recovery policy drawer`）。
 
+## 2026-08-11 / 支付渠道接入双模块配置结论
+
+- “支付渠道接入”抽屉重构为两个独立模块：Apple Store、Google Play；不再展示统一的“商店渠道”和“同步设置”模块。
+- 每个渠道模块均展示“运行状态”和精确到秒的“最近同步时间”。
+- 每个渠道模块均提供“退款通知参数”多行输入框，支持粘贴 JSON 格式参数并使用渠道名称生成对应占位提示。
+- 使用 `policyV2State.channelSettings` 保存两个渠道的运行信息和通知参数；点击“保存并发布”后更新页面状态，再次打开抽屉仍可读取填写结果。
+- 状态信息在桌面端双列展示，沿用现有绿色运行状态标签；700px 以下切换为单列，避免抽屉内压缩和截断。
+- Apple Store、Google Play、运行状态、最近同步时间、退款通知参数、两个模块调用、旧模块移除和保存状态链路共 9 类静态检查通过；内联脚本解析和 `git diff --check` 通过。
+- Browser 运行时因 Windows 沙箱 ACL 异常退出；未切换其他浏览器或绕过限制，实际模块高度、输入回显和保存 Toast 需本地刷新后人工复验。
+- 功能提交：`58217c8`（`feat: split payment channel configuration`），按用户要求仅本地提交，未推送远端。
+
 ## 资源
 
 - 目标仓库：<https://github.com/erduo85-source/refund_risk.git>
