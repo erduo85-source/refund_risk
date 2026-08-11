@@ -3359,6 +3359,54 @@ svg {
   font-size: 11px;
 }
 
+.channel-config-section .policy-drawer-section-body {
+  padding: 16px;
+}
+
+.channel-config-meta {
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.channel-config-fact {
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid #e2eaf3;
+  border-radius: 8px;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+}
+
+.channel-config-fact > span:first-child {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.channel-config-fact strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.channel-config-field label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.channel-config-field .textarea {
+  min-height: 88px;
+  line-height: 1.6;
+}
+
 @media (max-width: 900px) {
   .policy-mode-grid {
     grid-template-columns: 1fr;
@@ -3383,6 +3431,10 @@ svg {
   }
 
   .policy-drawer .rule-row {
+    grid-template-columns: 1fr;
+  }
+
+  .channel-config-meta {
     grid-template-columns: 1fr;
   }
 
@@ -7700,14 +7752,44 @@ function recoveryDrawerContent() {
   return drawerSection("补款金额计算", "选择用户需要完成的补款要求", radios) + drawerSection("解封执行", "配置补款完成后的处理方式", autoRules);
 }
 
+policyV2State.channelSettings = {
+  apple: {
+    status: "运行正常",
+    lastSync: "2026-08-11 14:17:36",
+    params: '{"bundleId":"com.yokaverse.nebula","environment":"PROD"}',
+  },
+  google: {
+    status: "运行正常",
+    lastSync: "2026-08-11 14:15:08",
+    params: '{"packageName":"com.yokaverse.nebula","projectId":"nebula-prod"}',
+  },
+};
+
+function channelConfigSection(key, title) {
+  const channel = policyV2State.channelSettings[key];
+  const fieldId = `${key}RefundNotificationParams`;
+  return `<section class="policy-drawer-section channel-config-section">
+    <div class="policy-drawer-section-head">
+      <h3>${title}</h3>
+      <p>展示运行信息并填写退款通知参数</p>
+    </div>
+    <div class="policy-drawer-section-body">
+      <div class="channel-config-meta">
+        <div class="channel-config-fact"><span>运行状态</span><span class="status-tag success">${channel.status}</span></div>
+        <div class="channel-config-fact"><span>最近同步时间</span><strong>${channel.lastSync}</strong></div>
+      </div>
+      <div class="channel-config-field">
+        <label for="${fieldId}">退款通知参数</label>
+        <textarea class="textarea policy-drawer-input" id="${fieldId}" data-channel-params="${key}" rows="3" spellcheck="false" placeholder="请输入 ${title} 退款通知参数" aria-describedby="${fieldId}Hint">${escapePolicyAttribute(channel.params)}</textarea>
+        <p class="policy-field-hint" id="${fieldId}Hint">支持粘贴渠道提供的 JSON 格式退款通知参数</p>
+      </div>
+    </div>
+  </section>`;
+}
+
 function channelsDrawerContent() {
-  const channels = `<div class="channel-compact"><span class="store-symbol apple">A</span><span class="channel-compact-copy"><strong>Apple App Store</strong><small>Server Notifications V2 · 1 分钟前同步</small></span><span class="status-tag success">运行正常</span></div>
-    <div class="channel-compact"><span class="store-symbol google"></span><span class="channel-compact-copy"><strong>Google Play</strong><small>Voided Purchases API · 3 分钟前同步</small></span><span class="status-tag success">运行正常</span></div>`;
-  const sync = [
-    policyRuleRow("漏单扫描频率", "主动拉取商店侧记录，补偿通知丢失", `<select class="select policy-drawer-input" style="width:160px" aria-label="漏单扫描频率"><option>每 5 分钟</option><option>每 10 分钟</option><option>每 30 分钟</option></select>`),
-    policyRuleRow("失败自动重试", "渠道接口异常时自动重试同步任务", `<span>最多 5 次</span><label class="switch"><input class="policy-drawer-input" type="checkbox" checked aria-label="失败自动重试"><span class="switch-track"></span></label>`),
-  ].join("");
-  return drawerSection("商店渠道", "退款通知、主动扫描与订单校验状态", channels) + drawerSection("同步设置", "控制退款记录的补偿扫描策略", sync);
+  return channelConfigSection("apple", "Apple Store")
+    + channelConfigSection("google", "Google Play");
 }
 
 function executionDrawerContent() {
@@ -8296,6 +8378,23 @@ savePolicyDrawer = function savePolicyDrawerRecoveryVersion4() {
 const savePolicyDrawerBeforeTriggerRefinement = savePolicyDrawer;
 savePolicyDrawer = function savePolicyDrawerTriggerVersion4() {
   savePolicyDrawerBeforeTriggerRefinement();
+};
+
+const savePolicyDrawerBeforeChannelRefinement = savePolicyDrawer;
+savePolicyDrawer = function savePolicyDrawerChannelsRefined() {
+  if (policyV2State.activeCard !== "channels") {
+    savePolicyDrawerBeforeChannelRefinement();
+    return;
+  }
+  document.querySelectorAll("[data-channel-params]").forEach((input) => {
+    const key = input.dataset.channelParams;
+    if (!policyV2State.channelSettings[key]) return;
+    policyV2State.channelSettings[key] = {
+      ...policyV2State.channelSettings[key],
+      params: input.value.trim(),
+    };
+  });
+  savePolicyDrawerBeforeChannelRefinement();
 };
 
 const closePolicyDrawerBeforeRefinement = closePolicyDrawer;
